@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Premium Firebase E-Commerce">
+
+<title>Premium Firebase E-Commerce</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div id="app">
+
+<header class="top-header">
+
+<div class="logo-area">
+
+<button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+
+<svg viewBox="0 0 24 24">
+<path d="M3 6h18M3 12h18M3 18h18"/>
+</svg>
+
+</button>
+
+<h1 class="logo">
+Shop
+<span>Pro</span>
+</h1>
+
+</div>
+
+<div class="header-actions">
+
+<button class="icon-btn" id="notificationBtn">
+
+<svg viewBox="0 0 24 24">
+<path d="M18 8A6 6 0 0 0 6 8v5l-2 3h16l-2-3z"/>
+<path d="M10 20a2 2 0 0 0 4 0"/>
+</svg>
+
+<span id="notificationCount">0</span>
+
+</button>
+
+<button class="icon-btn" id="moreMenuBtn">
+
+<svg viewBox="0 0 24 24">
+<circle cx="12" cy="5" r="1.5"/>
+<circle cx="12" cy="12" r="1.5"/>
+<circle cx="12" cy="19" r="1.5"/>
+</svg>
+
+</button>
+
+</div>
+
+</header>
+
+<aside id="drawer">
+
+<div class="drawer-header">
+
+<div class="drawer-profile">
+
+<img id="drawerProfileImage" alt="">
+
+<div>
+
+<h3 id="drawerUserName"></h3>
+
+<p id="drawerUserPhone"></p>
+
+</div>
+
+</div>
+
+<button id="drawerClose">
+
+<svg viewBox="0 0 24 24">
+<path d="M18 6L6 18M6 6l12 12"/>
+</svg>
+
+</button>
+
+</div>
+
+<nav class="drawer-menu">
+
+<a href="#" id="menuProfile">
+
+<svg viewBox="0 0 24 24">
+<circle cx="12" cy="8" r="4"/>
+<path d="M4 21a8 8 0 0 1 16 0"/>
+</svg>
+
+<span>My Profile</span>
+
+</a>
+
+<a href="#" id="menuOrders">
+
+<svg viewBox="0 0 24 24">
+<path d="M6 2h12v20H6z"/>
+<path d="M9 7h6"/>
+<path d="M9 12h6"/>
+<path d="M9 17h6"/>
+</svg>
+
+<span>My Orders</span>
+
+</a>
+
+<a href="#" id="menuWishlist">
+
+<svg viewBox="0 0 24 24">
+<path d="M12 21l-8-7A5 5 0 0 1 12 5a5 5 0 0 1 8 9z"/>
+</svg>
+
+<span>Wishlist</span>
+
+</a>
+
+<a href="#" id="menuChat">
+
+<svg viewBox="0 0 24 24">
+<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+</svg>
+
+<span>Chat</span>
+
+</a>
+
+<a href="#" id="menuNotifications">
+
+<svg viewBox="0 0 24 24">
+<path d="M18 8A6 6 0 0 0 6 8v5l-2 3h16l-2-3z"/>
+</svg>
+
+<span>Notifications</span>
+
+</a>
+
+<a href="#" id="menuSettings">
+
+<svg viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="3"/>
+<path d="M19 12l2-1-2-1-.5-2 1.5-1.5-2.5-2.5L16 5l-2-.5-1-2h-2l-1 2-2 .5-1.5-1.5-2.5 2.5L5 8l-.5 2-2 1 2 1 .5 2L3.5 15.5 6 18l1.5-1.5 2 .5 1 2h2l1-2 2-.5L18 18l2.5-2.5L19 14z"/>
+</svg>
+
+<span>Settings</span>
+
+</a>
+
+<a href="#" id="menuHelp">
+
+<svg viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="10"/>
+<path d="M9 9a3 3 0 1 1 5 2c-1 1-2 1.5-2 3"/>
+<circle cx="12" cy="17" r="1"/>
+</svg>
+
+<span>Help Center</span>
+
+</a>
+
+<a href="#" id="menuContact">
+
+<svg viewBox="0 0 24 24">
+<path d="M4 4h16v12H5.17L4 17.17z"/>
+<path d="M4 4l8 7 8-7"/>
+</svg>
+
+<span>Contact Us</span>
+
+</a>
+
+<a href="#" id="menuAbout">
+
+<svg viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="10"/>
+<path d="M12 8h.01"/>
+<path d="M11 12h1v4h1"/>
+</svg>
+
+<span>About</span>
+
+</a>
+
+<a href="#" id="menuLogout">
+
+<svg viewBox="0 0 24 24">
+<path d="M16 17l5-5-5-5"/>
+<path d="M21 12H9"/>
+<path d="M13 21H4V3h9"/>
+</svg>
+
+<span>Logout</span>
+
+</a>
+
+</nav>
+
+</aside>
+
+<div id="drawerOverlay"></div>
+
+<main>
+
+<section class="hero-section">
+
+<div class="hero-slider" id="heroSlider">
+
+<div class="hero-wrapper" id="heroWrapper">
+
+</div>
+
+<div class="hero-pagination" id="heroPagination"></div>
+
+</div>
+
+</section>
+
+<section class="featured-categories">
+
+<div class="section-header">
+
+<h2>Categories</h2>
+
+<button id="viewAllCategory">
+View All
+</button>
+
+</div>
+
+<div class="category-grid" id="categoryGrid">
+
+</div>
+
+</section>
+
+<section class="search-filter-section">
+
+<div class="search-box">
+
+<input
+type="text"
+id="searchInput"
+placeholder="Search Products">
+
+<button id="searchBtn">
+
+<svg viewBox="0 0 24 24">
+<circle cx="11" cy="11" r="7"/>
+<path d="M20 20l-4-4"/>
+</svg>
+
+</button>
+
+</div>
+
+<div class="filter-scroll">
+
+<select id="categoryFilter">
+<option value="">Category</option>
+</select>
+
+<select id="brandFilter">
+<option value="">Brand</option>
+</select>
+
+<select id="priceFilter">
+<option value="">Price</option>
+</select>
+
+<select id="ratingFilter">
+<option value="">Rating</option>
+</select>
+
+<select id="stockFilter">
+<option value="">Availability</option>
+</select>
+
+<select id="sortFilter">
+<option value="newest">Newest</option>
+<option value="popular">Popular</option>
+<option value="bestSelling">Best Selling</option>
+<option value="lowPrice">Lowest Price</option>
+<option value="highPrice">Highest Price</option>
+<option value="topRated">Highest Rated</option>
+</select>
+
+</div>
+
+</section><section class="featured-products">
+
+<div class="section-header">
+
+<h2>Featured Products</h2>
+
+<button id="viewAllProducts">
+View All
+</button>
+
+</div>
+
+<div
+class="products-grid"
+id="featuredProducts">
+
+</div>
+
+</section>
+
+<section
+class="all-products-section">
+
+<div class="section-header">
+
+<h2>Products</h2>
+
+<span
+id="productCount">
+0 Products
+</span>
+
+</div>
+
+<div
+id="productSkeleton"
+class="product-skeleton">
+
+<div class="skeleton-card"></div>
+<div class="skeleton-card"></div>
+<div class="skeleton-card"></div>
+<div class="skeleton-card"></div>
+<div class="skeleton-card"></div>
+<div class="skeleton-card"></div>
+
+</div>
+
+<div
+class="products-grid"
+id="productGrid">
+
+</div>
+
+<div
+id="emptyState"
+class="empty-state hidden">
+
+<svg viewBox="0 0 24 24">
+
+<circle
+cx="12"
+cy="12"
+r="10"/>
+
+<path
+d="M8 8h8v8H8z"/>
+
+</svg>
+
+<h3>
+No Products Found
+</h3>
+
+<p>
+Please change filters.
+</p>
+
+</div>
+
+</section>
+
+</main>
+
+<div
+id="productModal"
+class="modal">
+
+<div
+class="modal-content product-modal">
+
+<button
+class="close-modal"
+id="closeProductModal">
+
+&times;
+
+</button>
+
+<div
+class="product-gallery">
+
+<div
+class="main-image">
+
+<img
+id="productMainImage"
+loading="lazy"
+alt="">
+
+</div>
+
+<div
+id="productThumbnails"
+class="thumbnail-list">
+
+</div>
+
+</div>
+
+<div
+class="product-information">
+
+<div
+class="product-top">
+
+<span
+id="productBadge"
+class="badge">
+
+</span>
+
+<h2
+id="productTitle">
+
+</h2>
+
+</div>
+
+<div
+class="rating-row">
+
+<div
+id="productStars">
+
+</div>
+
+<span
+id="productReviewCount">
+
+</span>
+
+</div>
+
+<div
+class="price-row">
+
+<span
+id="productDiscountPrice">
+
+</span>
+
+<span
+id="productOriginalPrice">
+
+</span>
+
+</div>
+
+<div
+class="stock-brand">
+
+<p>
+
+<strong>
+Brand
+</strong>
+
+<span
+id="productBrand">
+
+</span>
+
+</p>
+
+<p>
+
+<strong>
+SKU
+</strong>
+
+<span
+id="productSKU">
+
+</span>
+
+</p>
+
+<p>
+
+<strong>
+Stock
+</strong>
+
+<span
+id="productStock">
+
+</span>
+
+</p>
+
+</div>
+
+<div
+class="description">
+
+<h3>
+Description
+</h3>
+
+<p
+id="productDescription">
+
+</p>
+
+</div>
+
+<div
+class="specification">
+
+<h3>
+Specifications
+</h3>
+
+<div
+id="productSpecifications">
+
+</div>
+
+</div>
+
+<div
+class="quantity-box">
+
+<button
+id="qtyMinus">
+
+−
+
+</button>
+
+<input
+id="productQty"
+type="number"
+min="1"
+value="1">
+
+<button
+id="qtyPlus">
+
++
+
+</button>
+
+</div>
+
+<div
+class="product-buttons">
+
+<button
+id="wishlistButton"
+class="secondary-btn">
+
+Wishlist
+
+</button>
+
+<button
+id="addCartButton"
+class="primary-btn">
+
+Add To Cart
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div
+id="cartDrawer"
+class="cart-drawer">
+
+<div
+class="drawer-top">
+
+<h2>
+Shopping Cart
+</h2>
+
+<button
+id="closeCart">
+
+&times;
+
+</button>
+
+</div>
+
+<div
+id="cartItems">
+
+</div>
+
+<div
+class="coupon-area">
+
+<input
+type="text"
+id="couponCode"
+placeholder="Coupon Code">
+
+<button
+id="applyCoupon">
+
+Apply
+
+</button>
+
+</div>
+
+<div
+class="summary-box">
+
+<div>
+
+<span>
+Subtotal
+</span>
+
+<strong
+id="subtotalPrice">
+
+৳0
+
+</strong>
+
+</div>
+
+<div>
+
+<span>
+Delivery
+</span>
+
+<strong
+id="deliveryCharge">
+
+৳0
+
+</strong>
+
+</div>
+
+<div>
+
+<span>
+Discount
+</span>
+
+<strong
+id="discountAmount">
+
+৳0
+
+</strong>
+
+</div>
+
+<div
+class="grand-total">
+
+<span>
+Total
+</span>
+
+<strong
+id="grandTotal">
+
+৳0
+
+</strong>
+
+</div>
+
+<button
+id="checkoutButton"
+class="checkout-btn">
+
+Proceed To Checkout
+
+</button>
+
+</div>
+
+</div>
+
+<div
+id="checkoutModal"
+class="modal">
+
+<div
+class="modal-content checkout-content">
+
+<button
+id="closeCheckout">
+
+&times;
+
+</button>
+
+<h2>
+
+Checkout
+
+</h2>
+
+<form
+id="checkoutForm">
+
+<input
+type="text"
+id="customerName"
+placeholder="Full Name"
+required>
+
+<input
+type="tel"
+id="customerPhone"
+placeholder="Phone Number"
+required>
+
+<input type="text" id="division" placeholder="Division (e.g. Dhaka)" required>
+<input type="text" id="district" placeholder="District (e.g. Gazipur)" required>
+<input type="text" id="upazila" placeholder="Upazila / Thana" required>
+
+</select>
+
+<input
+type="text"
+id="area"
+placeholder="Area"
+required>
+
+<textarea
+id="address"
+placeholder="Address"
+required>
+
+</textarea>
+
+<textarea
+id="deliveryNote"
+placeholder="Delivery Note">
+
+</textarea>
+
+<div
+class="payment-methods">
+
+<label>
+
+<input
+type="radio"
+name="payment"
+value="cod"
+checked>
+
+Cash On Delivery
+
+</label>
+
+<label>
+
+<input
+type="radio"
+name="payment"
+value="bkash">
+
+bKash
+
+</label>
+
+<label>
+
+<input
+type="radio"
+name="payment"
+value="nagad">
+
+Nagad
+
+</label>
+
+</div>
+
+<button
+type="submit"
+class="place-order-btn"
+id="placeOrderButton">
+
+Place Order
+
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+<div
+id="orderSuccessModal"
+class="modal">
+
+<div
+class="modal-content success-content">
+
+<div
+class="success-animation">
+
+<svg
+viewBox="0 0 120 120">
+
+<circle
+cx="60"
+cy="60"
+r="54"
+class="success-circle">
+
+</circle>
+
+<path
+class="success-check"
+d="M34 62L52 80L87 44">
+
+</path>
+
+</svg>
+
+</div>
+
+<h2>
+
+Order Successful
+
+</h2>
+
+<p>
+
+Your order has been placed successfully.
+
+</p>
+
+<h3
+id="generatedOrderNumber">
+
+</h3>
+
+<button
+id="continueShopping">
+
+Continue Shopping
+
+</button>
+
+</div>
+
+</div>
+
+<div
+id="chatPanel"
+class="chat-panel">
+
+<div
+class="chat-header">
+
+<div
+class="chat-user">
+
+<div
+class="online-dot">
+
+</div>
+
+<div>
+
+<h3>
+
+Support
+
+</h3>
+
+<p
+id="adminOnlineStatus">
+
+Online
+
+</p>
+
+</div>
+
+</div>
+
+<button
+id="closeChatPanel">
+
+&times;
+
+</button>
+
+</div>
+
+<div
+id="typingIndicator"
+class="typing-indicator hidden">
+
+Admin is typing...
+
+</div>
+
+<div
+id="chatMessages"
+class="chat-messages">
+
+</div>
+
+<div
+class="chat-input-area">
+
+<label
+for="chatImage"
+class="attach-btn">
+
+<svg
+viewBox="0 0 24 24">
+
+<path
+d="M16.5 6.5L9 14a3 3 0 104.2 4.2L20 11.5A5 5 0 0012.9 4.4L5.6 11.7a7 7 0 009.9 9.9L21 16">
+
+</path>
+
+</svg>
+
+</label>
+
+<input
+type="file"
+id="chatImage"
+accept="image/*"
+hidden>
+
+<input
+type="text"
+id="chatInput"
+placeholder="Type your message...">
+
+<button
+id="sendMessageButton">
+
+<svg
+viewBox="0 0 24 24">
+
+<path
+d="M2 21L23 12L2 3L2 10L17 12L2 14Z">
+
+</path>
+
+</svg>
+
+</button>
+
+</div>
+
+</div>
+
+<div
+id="profilePage"
+class="page hidden">
+
+<div
+class="profile-cover">
+
+<div
+class="profile-image-wrapper">
+
+<img
+id="profileImage"
+alt="">
+
+<label
+for="profileUpload"
+class="camera-btn">
+
+<svg
+viewBox="0 0 24 24">
+
+<path
+d="M4 7h4l2-2h4l2 2h4v13H4z"></path>
+
+<circle
+cx="12"
+cy="13"
+r="4"></circle>
+
+</svg>
+
+</label>
+
+<input
+type="file"
+id="profileUpload"
+accept="image/*"
+hidden>
+
+</div>
+
+<h2
+id="profileName">
+
+</h2>
+
+<p
+id="profilePhone">
+
+</p>
+
+</div>
+
+<div
+class="profile-card">
+
+<h3>
+
+Personal Information
+
+</h3>
+
+<div
+class="profile-field">
+
+<label>
+
+Full Name
+
+</label>
+
+<input
+type="text"
+id="editName">
+
+</div>
+
+<div
+class="profile-field">
+
+<label>
+
+Phone
+
+</label>
+
+<input
+type="text"
+id="editPhone">
+
+</div>
+
+<div
+class="profile-field">
+
+<label>
+
+Address
+
+</label>
+
+<textarea
+id="editAddress">
+
+</textarea>
+
+</div>
+
+<button
+id="saveProfileButton">
+
+Save Changes
+
+</button>
+
+</div>
+
+<div
+class="profile-card">
+
+<h3>
+
+Order History
+
+</h3>
+
+<div
+id="orderHistoryList">
+
+</div>
+
+</div>
+
+<div
+class="profile-card">
+
+<h3>
+
+Wishlist
+
+</h3>
+
+<div
+id="wishlistList">
+
+</div>
+
+</div>
+
+<div
+class="profile-card">
+
+<h3>
+
+Settings
+
+</h3>
+
+<div
+class="setting-item">
+
+<span>
+
+Dark Mode
+
+</span>
+
+<label
+class="switch">
+
+<input
+type="checkbox"
+id="themeToggle">
+
+<span
+class="slider">
+
+</span>
+
+</label>
+
+</div>
+
+<div
+class="setting-item">
+
+<span>
+
+Notifications
+
+</span>
+
+<label
+class="switch">
+
+<input
+type="checkbox"
+id="notificationToggle"
+checked>
+
+<span
+class="slider">
+
+</span>
+
+</label>
+
+</div>
+
+</div>
+
+</div>
+
+<div
+id="toastContainer">
+
+</div>
+
+<div
+id="alertDialog"
+class="dialog hidden">
+
+<div
+class="dialog-box">
+
+<h3
+id="dialogTitle">
+
+</h3>
+
+<p
+id="dialogMessage">
+
+</p>
+
+<div
+class="dialog-actions">
+
+<button
+id="dialogCancel">
+
+Cancel
+
+</button>
+
+<button
+id="dialogConfirm">
+
+OK
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<nav
+class="bottom-navigation">
+
+<button
+class="nav-item active"
+data-page="home">
+
+<svg
+viewBox="0 0 24 24">
+
+<path
+d="M3 10L12 3L21 10V21H14V14H10V21H3Z">
+
+</path>
+
+</svg>
+
+<span>
+
+Home
+
+</span>
+
+</button>
+
+<button
+class="nav-item"
+data-page="wishlist">
+
+<svg
+viewBox="0 0 24 24">
+
+<path
+d="M12 21L4 14A5 5 0 0112 5A5 5 0 0120 14Z">
+
+</path>
+
+</svg>
+
+<span>
+
+Wishlist
+
+</span>
+
+</button>
+
+<button
+class="nav-item"
+data-page="cart">
+
+<svg
+viewBox="0 0 24 24">
+
+<path
+d="M6 6H21L19 14H8L6 4H3"></path>
+
+<circle
+cx="9"
+cy="19"
+r="1.5"></circle>
+
+<circle
+cx="18"
+cy="19"
+r="1.5"></circle>
+
+</svg>
+
+<span>
+
+Cart
+
+</span>
+
+</button>
+
+<button
+class="nav-item"
+data-page="chat">
+
+<svg
+viewBox="0 0 24 24">
+
+<path
+d="M4 4H20V16H7L4 19Z">
+
+</path>
+
+</svg>
+
+<span>
+
+Chat
+
+</span>
+
+</button>
+
+<button
+class="nav-item"
+data-page="profile">
+
+<svg
+viewBox="0 0 24 24">
+
+<circle
+cx="12"
+cy="8"
+r="4"></circle>
+
+<path
+d="M4 21A8 8 0 0120 21">
+
+</path>
+
+</svg>
+
+<span>
+
+Profile
+
+</span>
+
+</button>
+
+</nav>
+
+<script type="module" src="firebase.js"></script>
+<script type="module" src="app.js"></script>
+
+</body>
+</html>
+

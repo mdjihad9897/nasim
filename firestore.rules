@@ -1,0 +1,161 @@
+rules_version = '2';
+
+service cloud.firestore {
+
+match /databases/{database}/documents {
+
+function signedIn() {
+
+return request.auth != null;
+
+}
+
+function owner(uid) {
+
+return signedIn() && request.auth.uid == uid;
+
+}
+
+function admin() {
+
+return signedIn() &&
+
+get(
+
+/databases/$(database)/documents/users/$(request.auth.uid)
+
+).data.role == "admin";
+
+}
+
+match /users/{userId} {
+
+allow read,update: if owner(userId) || admin();
+
+allow create: if signedIn();
+
+allow delete: if admin();
+
+}
+
+match /products/{productId} {
+
+allow read: if true;
+
+allow create,update,delete: if admin();
+
+}
+
+match /categories/{categoryId} {
+
+allow read: if true;
+
+allow create,update,delete: if admin();
+
+}
+
+match /banners/{bannerId} {
+
+allow read: if true;
+
+allow create,update,delete: if admin();
+
+}
+
+match /orders/{orderId} {
+
+allow create: if signedIn();
+
+allow read: if admin() ||
+
+resource.data.uid == request.auth.uid;
+
+allow update: if admin();
+
+allow delete: if admin();
+
+}
+
+match /wishlist/{wishlistId} {
+
+allow read,write: if
+
+signedIn() &&
+
+request.resource.data.uid == request.auth.uid;
+
+}
+
+match /cart/{cartId} {
+
+allow read,write: if
+
+signedIn() &&
+
+request.resource.data.uid == request.auth.uid;
+
+}
+
+match /reviews/{reviewId} {
+
+allow read: if true;
+
+allow create: if signedIn();
+
+allow update,delete: if admin();
+
+}
+
+match /notifications/{notificationId} {
+
+allow read: if
+
+signedIn() &&
+
+resource.data.uid == request.auth.uid
+
+|| admin();
+
+allow create,update,delete: if admin();
+
+}
+
+match /coupons/{couponId} {
+
+allow read: if signedIn();
+
+allow create,update,delete: if admin();
+
+}
+
+match /settings/{settingId} {
+
+allow read: if true;
+
+allow write: if admin();
+
+}
+
+match /chats/{chatId} {
+
+allow read,write: if
+
+admin() ||
+
+owner(chatId);
+
+match /messages/{messageId} {
+
+allow read,write: if
+
+admin() ||
+
+owner(chatId);
+
+}
+
+}
+
+}
+
+}

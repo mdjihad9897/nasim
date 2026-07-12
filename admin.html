@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Admin Dashboard</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div id="toastContainer"></div>
+
+<header class="admin-header">
+
+<div class="admin-logo">
+
+<h2>
+
+Admin Dashboard
+
+</h2>
+
+</div>
+
+<div class="admin-header-right">
+
+<button id="adminNotification">
+
+Notifications
+
+</button>
+
+<button id="adminLogout">
+
+Logout
+
+</button>
+
+</div>
+
+</header>
+
+<div class="admin-layout">
+
+<aside class="admin-sidebar">
+
+<button class="admin-menu active" data-tab="dashboard">
+
+Dashboard
+
+</button>
+
+<button class="admin-menu" data-tab="products">
+
+Products
+
+</button>
+
+<button class="admin-menu" data-tab="categories">
+
+Categories
+
+</button>
+
+<button class="admin-menu" data-tab="orders">
+
+Orders
+
+</button>
+
+<button class="admin-menu" data-tab="customers">
+
+Customers
+
+</button>
+
+<button class="admin-menu" data-tab="banners">
+
+Banners
+
+</button>
+
+<button class="admin-menu" data-tab="coupons">
+
+Coupons
+
+</button>
+
+<button class="admin-menu" data-tab="chat">
+
+Live Chat
+
+</button>
+
+<button class="admin-menu" data-tab="notifications">
+
+Notifications
+
+</button>
+
+</aside>
+
+<main class="admin-content">
+
+<section id="dashboardTab" class="admin-page">
+
+<div class="dashboard-grid">
+
+<div class="dashboard-card">
+
+<h4>
+
+Revenue
+
+</h4>
+
+<h2 id="totalRevenue">
+
+৳0
+
+</h2>
+
+</div>
+
+<div class="dashboard-card">
+
+<h4>
+
+Orders
+
+</h4>
+
+<h2 id="totalOrders">
+
+0
+
+</h2>
+
+</div>
+
+<div class="dashboard-card">
+
+<h4>
+
+Products
+
+</h4>
+
+<h2 id="totalProducts">
+
+0
+
+</h2>
+
+</div>
+
+<div class="dashboard-card">
+
+<h4>
+
+Customers
+
+</h4>
+
+<h2 id="totalCustomers">
+
+0
+
+</h2>
+
+</div>
+
+<div class="dashboard-card">
+
+<h4>
+
+Low Stock
+
+</h4>
+
+<h2 id="lowStock">
+
+0
+
+</h2>
+
+</div>
+
+<div class="dashboard-card">
+
+<h4>
+
+Out Of Stock
+
+</h4>
+
+<h2 id="outOfStock">
+
+0
+
+</h2>
+
+</div>
+
+</div>
+
+</section>
+
+<section id="productsTab" class="admin-page hidden">
+
+<div class="admin-toolbar">
+
+<h3>
+
+Product Management
+
+</h3>
+
+<div>
+
+<input
+id="productId"
+type="hidden">
+
+<input
+id="productImages"
+type="file"
+accept="image/*"
+multiple>
+
+<input
+id="productName"
+type="text"
+placeholder="Product Name">
+
+<input
+id="productBrand"
+type="text"
+placeholder="Brand">
+
+<input
+id="productCategory"
+type="text"
+placeholder="Category">
+
+<input
+id="productSku"
+type="text"
+placeholder="SKU">
+
+<input
+id="productPrice"
+type="number"
+placeholder="Price">
+
+<input
+id="productSalePrice"
+type="number"
+placeholder="Sale Price">
+
+<input
+id="productStock"
+type="number"
+placeholder="Stock">
+
+<input
+id="productBadge"
+type="text"
+placeholder="Badge">
+
+<textarea
+id="productDescription"
+placeholder="Description"></textarea>
+
+<button onclick="addProduct()">
+
+Add Product
+
+</button>
+
+<button onclick="updateProduct()">
+
+Update Product
+
+</button>
+
+<button onclick="exportProducts()">
+
+Export CSV
+
+</button>
+
+<label class="admin-upload">
+
+Import CSV
+
+<input id="productImport" type="file" accept=".csv" onchange="importProducts(this.files[0])" hidden>
+
+</label>
+
+</div>
+
+</div>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Image
+
+</th>
+
+<th>
+
+Name
+
+</th>
+
+<th>
+
+Brand
+
+</th>
+
+<th>
+
+Stock
+
+</th>
+
+<th>
+
+Price
+
+</th>
+
+<th>
+
+Action
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="productTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="categoriesTab" class="admin-page hidden">
+
+<div class="admin-toolbar">
+
+<h3>
+
+Category Management
+
+</h3>
+
+<div>
+
+<input
+id="categoryId"
+type="hidden">
+
+<input
+id="categoryImage"
+type="file"
+accept="image/*">
+
+<input
+id="categoryName"
+type="text"
+placeholder="Category Name">
+
+<button onclick="addCategory()">
+
+Add
+
+</button>
+
+<button onclick="updateCategory()">
+
+Update
+
+</button>
+
+</div>
+
+</div>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Image
+
+</th>
+
+<th>
+
+Category
+
+</th>
+
+<th>
+
+Sub Category
+
+</th>
+
+<th>
+
+Action
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="categoryTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="ordersTab" class="admin-page hidden">
+
+<h3>
+
+Order Management
+
+</h3>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Order</th>
+
+<th>Customer</th>
+
+<th>Payment</th>
+
+<th>Payment Status</th>
+
+<th>Delivery</th>
+
+<th>Status</th>
+
+<th>Total</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="orderTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="customersTab" class="admin-page hidden">
+
+<h3>
+
+Customer Management
+
+</h3>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Photo</th>
+
+<th>Name</th>
+
+<th>Phone</th>
+
+<th>Email</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="customerTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="bannersTab" class="admin-page hidden">
+
+<div class="admin-toolbar">
+
+<h3>
+
+Banner Management
+
+</h3>
+
+<div>
+
+<input
+id="bannerId"
+type="hidden">
+
+<input
+id="bannerImage"
+type="file"
+accept="image/*">
+
+<input
+id="bannerTitle"
+type="text"
+placeholder="Banner Title">
+
+<input
+id="bannerSubtitle"
+type="text"
+placeholder="Banner Subtitle">
+
+<input
+id="bannerLink"
+type="text"
+placeholder="Banner Link">
+
+<input
+id="bannerPriority"
+type="number"
+placeholder="Priority">
+
+<button onclick="addBanner()">
+
+Add
+
+</button>
+
+<button onclick="updateBanner()">
+
+Update
+
+</button>
+
+</div>
+
+</div>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Image</th>
+
+<th>Title</th>
+
+<th>Priority</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="bannerTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="couponsTab" class="admin-page hidden">
+
+<div class="admin-toolbar">
+
+<h3>
+
+Coupon Management
+
+</h3>
+
+<div>
+
+<input
+id="couponId"
+type="hidden">
+
+<input
+id="couponCode"
+type="text"
+placeholder="Coupon Code">
+
+<input
+id="couponAmount"
+type="number"
+placeholder="Amount">
+
+<input
+id="couponExpiry"
+type="date">
+
+<button onclick="addCoupon()">
+
+Add
+
+</button>
+
+<button onclick="updateCoupon()">
+
+Update
+
+</button>
+
+</div>
+
+</div>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Code</th>
+
+<th>Amount</th>
+
+<th>Expiry</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="couponTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="chatTab" class="admin-page hidden">
+
+<h3>
+
+Live Chat
+
+</h3>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>User</th>
+
+<th>Last Message</th>
+
+<th>Status</th>
+
+<th>Typing</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="chatTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="notificationsTab" class="admin-page hidden">
+
+<h3>
+
+Send Notification
+
+</h3>
+
+<div class="admin-form">
+
+<input
+id="notificationTitle"
+type="text"
+placeholder="Notification Title">
+
+<textarea
+id="notificationMessage"
+placeholder="Notification Message">
+
+</textarea>
+
+<button
+onclick="sendPromotionNotification()">
+
+Send Notification
+
+</button>
+
+</div>
+
+</section>
+
+</main>
+
+</div>
+
+<div id="orderViewer" class="modal">
+
+<div class="modal-content">
+
+<button
+class="modal-close"
+onclick="document.getElementById('orderViewer').classList.remove('active')">
+
+✕
+
+</button>
+
+<h2>
+
+Order Details
+
+</h2>
+
+<p>
+
+Order :
+<strong id="viewerNumber"></strong>
+
+</p>
+
+<p>
+
+Customer :
+<strong id="viewerCustomer"></strong>
+
+</p>
+
+<p>
+
+Phone :
+<strong id="viewerPhone"></strong>
+
+</p>
+
+<p>
+
+Address :
+<strong id="viewerAddress"></strong>
+
+</p>
+
+<p>
+
+Payment :
+<strong id="viewerPayment"></strong>
+
+</p>
+
+<div id="viewerItems">
+
+</div>
+
+<label>
+
+Order Status
+
+</label>
+
+<select id="viewerStatus">
+
+<option>Pending</option>
+
+<option>Confirmed</option>
+
+<option>Processing</option>
+
+<option>Shipped</option>
+
+<option>Delivered</option>
+
+<option>Cancelled</option>
+
+</select>
+
+<label>
+
+Delivery Status
+
+</label>
+
+<select id="viewerDelivery">
+
+<option>Pending</option>
+
+<option>On The Way</option>
+
+<option>Delivered</option>
+
+</select>
+
+<label>
+
+Payment Status
+
+</label>
+
+<select id="viewerPaymentStatus">
+
+<option>Pending</option>
+
+<option>Paid</option>
+
+<option>Failed</option>
+
+</select>
+
+<button
+onclick="saveOrderStatus()">
+
+Save
+
+</button>
+
+</div>
+
+</div>
+
+<div id="customerModal" class="modal">
+
+<div class="modal-content">
+
+<button
+class="modal-close"
+onclick="document.getElementById('customerModal').classList.remove('active')">
+
+✕
+
+</button>
+
+<img
+id="customerImage"
+class="customer-avatar"
+src=""
+alt="Customer">
+
+<h2 id="customerName"></h2>
+
+<p id="customerEmail"></p>
+
+<p id="customerPhone"></p>
+
+<p id="customerAddress"></p>
+
+<h3>
+
+Order History
+
+</h3>
+
+<div id="customerOrders"></div>
+
+</div>
+
+</div>
+
+<div id="chatModal" class="modal">
+
+<div class="modal-content admin-chat-window">
+
+<button
+class="modal-close"
+onclick="document.getElementById('chatModal').classList.remove('active')">
+
+✕
+
+</button>
+
+<h3>
+
+Chat With
+
+<span id="adminChatUser"></span>
+
+</h3>
+
+<div
+id="adminChatMessages"
+class="admin-chat-messages">
+
+</div>
+
+<div class="admin-chat-input">
+
+<input
+id="adminMessage"
+type="text"
+placeholder="Type message...">
+
+<button id="adminSend">
+
+Send
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+document.querySelectorAll(".admin-menu").forEach(button=>{
+
+button.onclick=()=>{
+
+document.querySelectorAll(".admin-menu").forEach(item=>{
+
+item.classList.remove("active");
+
+});
+
+button.classList.add("active");
+
+document.querySelectorAll(".admin-page").forEach(page=>{
+
+page.classList.add("hidden");
+
+});
+
+document.getElementById(
+
+button.dataset.tab+"Tab"
+
+).classList.remove("hidden");
+
+};
+
+});
+
+</script>
+
+<script type="module" src="admin.js"></script>
+
+</body>
+
+</html>
