@@ -1,68 +1,67 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 
 import {
-getAuth,
-GoogleAuthProvider,
-FacebookAuthProvider,
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword,
-sendPasswordResetEmail,
-signOut,
-updateProfile,
-updateEmail,
-updatePassword,
-onAuthStateChanged
+  getAuth,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signOut,
+  updateProfile,
+  updateEmail,
+  updatePassword,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 import {
-getFirestore,
-collection,
-doc,
-setDoc,
-addDoc,
-updateDoc,
-deleteDoc,
-getDoc,
-getDocs,
-query,
-where,
-orderBy,
-limit,
-startAfter,
-serverTimestamp,
-onSnapshot,
-writeBatch,
-runTransaction,
-increment
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
+  startAfter,
+  serverTimestamp,
+  onSnapshot,
+  writeBatch,
+  runTransaction,
+  increment
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 import {
-getStorage,
-ref,
-uploadBytes,
-uploadBytesResumable,
-getDownloadURL,
-deleteObject
+  getStorage,
+  ref,
+  uploadBytes,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
-const firebaseConfig={
-
-apiKey:"",
-authDomain:"",
-projectId:"",
-storageBucket:"",
-messagingSenderId:"",
-appId:""
-
+const firebaseConfig = {
+  apiKey: "AIzaSyDPT3fRRT8m_zHlpEfo3wuuWe2NRsHHUqs",
+  authDomain: "jihad-4b833.firebaseapp.com",
+  databaseURL: "https://jihad-4b833-default-rtdb.firebaseio.com",
+  projectId: "jihad-4b833",
+  storageBucket: "jihad-4b833.firebasestorage.app",
+  messagingSenderId: "668587419972",
+  appId: "1:668587419972:web:7ec0a9c5ff31929ff7cf11",
+  measurementId: "G-YGZBR5S47K"
 };
 
-const app=initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-const auth=getAuth(app);
-
-const db=getFirestore(app);
-
-const storage=getStorage(app);
+// বাকি কোড অপরিবর্তিত থাকবে...
 
 const googleProvider=new GoogleAuthProvider();
 
