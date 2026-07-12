@@ -965,9 +965,3 @@ ref(storage,path)
 
 }
 
-export{
-
-auth
-
-};
-
