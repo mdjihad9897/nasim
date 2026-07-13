@@ -1,10 +1,10 @@
-import{
-
-auth,
-db,
-collections,
-
-onAuthStateChanged,
+import {
+  auth,
+  db,
+  onAuthStateChanged,
+  doc,
+  getDoc
+} from "./firebase.js";
 
 loadBanners,
 loadCategories,
@@ -1666,35 +1666,6 @@ showToast(
 };
 
 
-async function initialize(){
-
-onAuthStateChanged(
-
-auth,
-
-async user=>{
-
-if(!user){
-
-location.href="login.html";
-
-return;
-
-}
-
-state.user=user;
-
-const profile=
-
-await currentUserDocument(
-
-user.uid
-
-);
-
-if(profile.exists()){
-
-state.profile=profile.data();
 
 $("#profileName").textContent=
 
@@ -2186,3 +2157,81 @@ console.log(
 "color:#2563eb;font-size:16px;font-weight:bold;"
 
 );
+
+let currentUser = null;
+
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+  
+  if (user) {
+    state.user = user;
+    await loadUserProfileData(user);
+  } else {
+    state.user = null;
+    state.profile = null;
+    resetProfileUI();
+  }
+});
+
+async function loadUserProfileData(user) {
+  try {
+    const profileName = document.getElementById("profileName");
+    const editName = document.getElementById("editName");
+    
+    if (profileName) profileName.textContent = user.displayName || "User";
+    if (editName) editName.value = user.displayName || "";
+
+    const userDocRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userDocRef);
+
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      state.profile = userData;
+
+      const profilePhone = document.getElementById("profilePhone");
+      const editPhone = document.getElementById("editPhone");
+      const editAddress = document.getElementById("editAddress");
+
+      if (profilePhone) profilePhone.textContent = userData.phone || "";
+      if (editPhone) editPhone.value = userData.phone || "";
+      if (editAddress) editAddress.value = userData.address || "";
+    }
+  } catch (error) {
+    console.error("Profile load error:", error);
+  }
+}
+
+function resetProfileUI() {
+  const profileName = document.getElementById("profileName");
+  const profilePhone = document.getElementById("profilePhone");
+  const editName = document.getElementById("editName");
+  const editPhone = document.getElementById("editPhone");
+  const editAddress = document.getElementById("editAddress");
+
+  if (profileName) profileName.textContent = "Guest User";
+  if (profilePhone) profilePhone.textContent = "";
+  if (editName) editName.value = "";
+  if (editPhone) editPhone.value = "";
+  if (editAddress) editAddress.value = "";
+}
+
+const profileNavBtn = document.querySelector('.nav-item[data-page="profile"]');
+const menuProfileBtn = document.getElementById("menuProfile");
+
+function handleProfileClick(event) {
+  event.preventDefault();
+
+  if (!currentUser) {
+    window.location.href = "login.html";
+  } else {
+    if (typeof showPage === "function") {
+      showPage("profile");
+    } else {
+      const profilePage = document.getElementById("profilePage");
+      if (profilePage) profilePage.classList.remove("hidden");
+    }
+  }
+}
+
+if (profileNavBtn) profileNavBtn.addEventListener("click", handleProfileClick);
+if (menuProfileBtn) menuProfileBtn.addEventListener("click", handleProfileClick);
