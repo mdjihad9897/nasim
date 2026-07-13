@@ -25,21 +25,17 @@ registerForm.onsubmit = async (event) => {
   }
 
   try {
-    // ১. Firebase Authentication-এ নতুন ইউজার তৈরি
     const result = await createUserWithEmailAndPassword(auth, email, password);
 
-    // ২. Firebase Auth প্রোফাইলে ইউজারের নাম সেভ
     await updateProfile(result.user, {
       displayName: name
     });
 
-    // ৩. Firestore ডাটাবেজে ইউজারের নাম ও ফোন নম্বর সেভ
     await createUserDocument(result.user, {
       name,
       phone
     });
 
-    // ৪. রেজিস্ট্রেশন সফল হলে সরাসরি মেইন পেজে রিডাইরেক্ট
     location.href = "index.html";
 
   } catch (error) {
