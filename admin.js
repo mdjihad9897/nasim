@@ -257,61 +257,75 @@ function renderChats() {
   });
 }
 
-// Fixed Product Handlers for Direct Links
-window.addProduct = async () => {
+// প্রোডাক্ট এড করার ফাংশন
+async function handleAddProduct() {
   try {
-    const rawImages = $("#productImages").value.trim();
-    if (!rawImages) {
-      toast("Please enter image URL link!");
+    const name = $("#productName")?.value.trim();
+    const rawImages = $("#productImages")?.value.trim();
+    const price = Number($("#productPrice")?.value) || 0;
+    const stock = Number($("#productStock")?.value) || 0;
+
+    // ভ্যালিডেশন চেক
+    if (!name) {
+      toast("⚠️ প্রোডাক্টের নাম দিন!");
       return;
     }
+    if (!rawImages) {
+      toast("⚠️ অন্তত একটি ছবির URL লিংক দিন!");
+      return;
+    }
+
+    // ইমেজ লিংকগুলোকে আলাদা করা
     const images = rawImages.split(",").map(url => url.trim()).filter(url => url !== "");
 
+    // ফায়ারবেসে ডাটা পাঠানো
     await addDoc(collection(db, collections.products), {
-      name: $("#productName").value.trim(),
-      description: $("#productDescription").value.trim(),
-      brand: $("#productBrand").value.trim(),
-      categoryId: $("#productCategory").value.trim(),
-      sku: $("#productSku").value.trim(),
-      price: Number($("#productPrice").value) || 0,
-      salePrice: Number($("#productSalePrice").value) || 0,
-      stock: Number($("#productStock").value) || 0,
-      badge: $("#productBadge").value.trim(),
+      name: name,
+      description: $("#productDescription")?.value.trim() || "",
+      brand: $("#productBrand")?.value.trim() || "",
+      categoryId: $("#productCategory")?.value.trim() || "",
+      sku: $("#productSku")?.value.trim() || "",
+      price: price,
+      salePrice: Number($("#productSalePrice")?.value) || price,
+      stock: stock,
+      badge: $("#productBadge")?.value.trim() || "",
       rating: 0,
       reviewCount: 0,
       sales: 0,
       views: 0,
       status: "active",
-      images,
+      images: images,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
 
-    toast("Product Added Successfully!");
+    toast("✅ প্রোডাক্ট সফলভাবে যোগ হয়েছে!");
+    
+    // ইনপুট ফিল্ড খালি করা
     $("#productName").value = "";
+    $("#productDescription").value = "";
+    $("#productBrand").value = "";
+    $("#productCategory").value = "";
+    $("#productSku").value = "";
+    $("#productPrice").value = "";
+    $("#productSalePrice").value = "";
+    $("#productStock").value = "";
+    $("#productBadge").value = "";
     $("#productImages").value = "";
-  } catch (err) {
-    console.error(err);
-    toast("Failed to add product!");
-  }
-};
 
-window.editProduct = async id => {
-  const snapshot = await getDoc(doc(db, collections.products, id));
-  if (!snapshot.exists()) return;
-  const data = snapshot.data();
-  $("#productId").value = id;
-  $("#productName").value = data.name || "";
-  $("#productDescription").value = data.description || "";
-  $("#productBrand").value = data.brand || "";
-  $("#productCategory").value = data.categoryId || "";
-  $("#productSku").value = data.sku || "";
-  $("#productPrice").value = data.price || 0;
-  $("#productSalePrice").value = data.salePrice || 0;
-  $("#productStock").value = data.stock || 0;
-  $("#productBadge").value = data.badge || "";
-  $("#productImages").value = data.images ? data.images.join(", ") : "";
-};
+  } catch (error) {
+    console.error("Product Add Error: ", error);
+    toast("❌ ভুল হয়েছে: " + error.message);
+  }
+}
+
+// বোতামে ইভেন্ট লিসেনার যুক্ত করা (পৃষ্ঠা লোড হওয়ার পর)
+document.addEventListener("DOMContentLoaded", () => {
+  const btnAdd = document.getElementById("btnAddProduct");
+  if (btnAdd) {
+    btnAdd.addEventListener("click", handleAddProduct);
+  }
+});
 
 window.updateProduct = async () => {
   try {
