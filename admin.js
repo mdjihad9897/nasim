@@ -1,23 +1,10 @@
 import {
-  auth,
-  db,
-  collections,
-  onAuthStateChanged,
-  collection,
-  doc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  getDoc,
-  getDocs,
-  query,
-  orderBy,
-  where,
-  onSnapshot,
-  serverTimestamp,
-  signOut
+  auth, db, collections, onAuthStateChanged, collection, doc, addDoc, 
+  updateDoc, deleteDoc, getDoc, getDocs, query, orderBy, where, 
+  onSnapshot, serverTimestamp, signOut
 } from "./firebase.js";
 
+// Helper Functions
 const $ = selector => document.querySelector(selector);
 
 const state = {
@@ -27,651 +14,365 @@ const state = {
   customers: [],
   banners: [],
   coupons: [],
-  chats: []
+  chats: [],
+  notifications: []
 };
 
-function currency(value) {
-  return new Intl.NumberFormat("en-BD").format(value || 0);
+function currency(val) { 
+  return new Intl.NumberFormat("en-BD").format(val || 0); 
 }
 
-function toast(message) {
-  const container = $("#toastContainer");
-  if (!container) return;
+function toast(msg) {
+  let container = $("#toastContainer");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toastContainer";
+    container.className = "fixed bottom-5 right-5 z-50 flex flex-col gap-2";
+    document.body.appendChild(container);
+  }
   const div = document.createElement("div");
-  div.className = "bg-slate-800 text-white px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium animate-bounce";
-  div.textContent = message;
+  div.className = "bg-slate-900 text-white px-5 py-3 rounded-lg shadow-xl text-sm font-medium border border-slate-700 animate-bounce";
+  div.textContent = msg;
   container.appendChild(div);
-  setTimeout(() => div.remove(), 3000);
+  setTimeout(() => div.remove(), 3500);
 }
 
-function loadDashboard() {
-  watchProducts();
-  watchCategories();
-  watchOrders();
-  watchUsers();
-  watchCoupons();
-  watchBanners();
-  watchChats();
-}
-
-function watchProducts() {
-  onSnapshot(query(collection(db, collections.products), orderBy("createdAt", "desc")), snapshot => {
-    state.products = [];
-    snapshot.forEach(item => state.products.push({ id: item.id, ...item.data() }));
+// Realtime Data Syncing for All Sections
+function initDataSync() {
+  // 1. Products
+  onSnapshot(query(collection(db, collections.products), orderBy("createdAt", "desc")), snap => {
+    state.products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderProducts();
-    dashboardSummary();
-  });
-}
+    updateDashboard();
+  }, err => console.error("Products Sync Error:", err));
 
-function watchCategories() {
-  onSnapshot(query(collection(db, collections.categories), orderBy("name")), snapshot => {
-    state.categories = [];
-    snapshot.forEach(item => state.categories.push({ id: item.id, ...item.data() }));
+  // 2. Categories
+  onSnapshot(query(collection(db, collections.categories), orderBy("name")), snap => {
+    state.categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderCategories();
-    dashboardSummary();
-  });
-}
+    populateCategoryDropdown();
+  }, err => console.error("Categories Sync Error:", err));
 
-function watchOrders() {
-  onSnapshot(query(collection(db, collections.orders), orderBy("createdAt", "desc")), snapshot => {
-    state.orders = [];
-    snapshot.forEach(item => state.orders.push({ id: item.id, ...item.data() }));
+  // 3. Orders
+  onSnapshot(query(collection(db, collections.orders), orderBy("createdAt", "desc")), snap => {
+    state.orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderOrders();
-    dashboardSummary();
-  });
-}
+    updateDashboard();
+  }, err => console.error("Orders Sync Error:", err));
 
-function watchUsers() {
-  onSnapshot(query(collection(db, collections.users), orderBy("createdAt", "desc")), snapshot => {
-    state.customers = [];
-    snapshot.forEach(item => state.customers.push({ id: item.id, ...item.data() }));
+  // 4. Customers / Users
+  onSnapshot(query(collection(db, collections.users), orderBy("createdAt", "desc")), snap => {
+    state.customers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderCustomers();
-    dashboardSummary();
-  });
-}
+    updateDashboard();
+  }, err => console.error("Customers Sync Error:", err));
 
-function watchCoupons() {
-  onSnapshot(query(collection(db, collections.coupons), orderBy("createdAt", "desc")), snapshot => {
-    state.coupons = [];
-    snapshot.forEach(item => state.coupons.push({ id: item.id, ...item.data() }));
-    renderCoupons();
-  });
-}
-
-function watchBanners() {
-  onSnapshot(query(collection(db, collections.banners), orderBy("priority")), snapshot => {
-    state.banners = [];
-    snapshot.forEach(item => state.banners.push({ id: item.id, ...item.data() }));
+  // 5. Banners
+  onSnapshot(query(collection(db, collections.banners)), snap => {
+    state.banners = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderBanners();
-  });
-}
+  }, err => console.error("Banners Sync Error:", err));
 
-function watchChats() {
-  onSnapshot(query(collection(db, collections.chats), orderBy("updatedAt", "desc")), snapshot => {
-    state.chats = [];
-    snapshot.forEach(item => state.chats.push({ id: item.id, ...item.data() }));
+  // 6. Coupons
+  onSnapshot(query(collection(db, collections.coupons), orderBy("createdAt", "desc")), snap => {
+    state.coupons = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderCoupons();
+  }, err => console.error("Coupons Sync Error:", err));
+
+  // 7. Live Chat
+  onSnapshot(query(collection(db, collections.chats), orderBy("lastUpdated", "desc")), snap => {
+    state.chats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderChats();
-  });
+  }, err => console.error("Chats Sync Error:", err));
+
+  // 8. Notifications
+  onSnapshot(query(collection(db, collections.notifications), orderBy("createdAt", "desc")), snap => {
+    state.notifications = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderNotifications();
+  }, err => console.error("Notifications Sync Error:", err));
 }
 
-function dashboardSummary() {
-  const revenue = state.orders.reduce((sum, item) => sum + (item.total || 0), 0);
-  if ($("#totalRevenue")) $("#totalRevenue").textContent = `৳${currency(revenue)}`;
+// Dashboard Calculations
+function updateDashboard() {
+  const totalRev = state.orders.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
+  if ($("#totalRevenue")) $("#totalRevenue").textContent = `৳${currency(totalRev)}`;
   if ($("#totalOrders")) $("#totalOrders").textContent = state.orders.length;
   if ($("#totalProducts")) $("#totalProducts").textContent = state.products.length;
   if ($("#totalCustomers")) $("#totalCustomers").textContent = state.customers.length;
-  if ($("#lowStock")) $("#lowStock").textContent = state.products.filter(item => item.stock <= 5 && item.stock > 0).length;
-  if ($("#outOfStock")) $("#outOfStock").textContent = state.products.filter(item => item.stock <= 0).length;
 }
 
+function populateCategoryDropdown() {
+  const select = $("#productCategory");
+  if (!select) return;
+  select.innerHTML = `<option value="">Select Category</option>` + 
+    state.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+}
+// Render Products
 function renderProducts() {
-  const table = $("#productTable");
-  if (!table) return;
-  table.innerHTML = "";
-  state.products.forEach(product => {
-    const img = (product.images && product.images[0]) ? product.images[0] : "https://via.placeholder.com/50";
-    table.innerHTML += `
-      <tr class="hover:bg-slate-50 border-b border-slate-100">
-        <td class="p-4"><img src="${img}" class="w-12 h-12 object-cover rounded-lg border"></td>
-        <td class="p-4 font-medium text-slate-800">${product.name || ""}</td>
-        <td class="p-4">${product.brand || ""}</td>
-        <td class="p-4 font-bold ${product.stock > 0 ? "text-emerald-600" : "text-rose-600"}">${product.stock || 0}</td>
-        <td class="p-4">৳${currency(product.salePrice || product.price)}</td>
-        <td class="p-4 space-x-2">
-          <button onclick="editProduct('${product.id}')" class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded hover:bg-indigo-100 font-medium">Edit</button>
-          <button onclick="deleteProduct('${product.id}')" class="bg-rose-50 text-rose-600 px-3 py-1 rounded hover:bg-rose-100 font-medium">Delete</button>
-        </td>
-      </tr>
-    `;
-  });
+  const tbody = $("#productTable");
+  if (!tbody) return;
+  tbody.innerHTML = state.products.map(p => `
+    <tr class="border-b border-slate-700 hover:bg-slate-800/50">
+      <td class="p-3"><img src="${p.images?.[0] || 'https://via.placeholder.com/40'}" class="w-10 h-10 object-cover rounded-lg"></td>
+      <td class="p-3 font-medium text-white">${p.name || ''}</td>
+      <td class="p-3">${p.brand || 'N/A'}</td>
+      <td class="p-3">${p.stock || 0}</td>
+      <td class="p-3 font-semibold text-emerald-400">৳${currency(p.price)}</td>
+      <td class="p-3">
+        <button onclick="editProduct('${p.id}')" class="text-indigo-400 hover:text-indigo-300 mr-3">Edit</button>
+        <button onclick="deleteProduct('${p.id}')" class="text-rose-400 hover:text-rose-300">Delete</button>
+      </td>
+    </tr>
+  `).join("");
 }
 
+// Render Categories
 function renderCategories() {
-  const table = $("#categoryTable");
-  if (!table) return;
-  table.innerHTML = "";
-  state.categories.forEach(category => {
-    table.innerHTML += `
-      <tr class="hover:bg-slate-50 border-b border-slate-100">
-        <td class="p-4"><img src="${category.image || "https://via.placeholder.com/40"}" class="w-10 h-10 object-cover rounded-md"></td>
-        <td class="p-4 font-medium">${category.name || ""}</td>
-        <td class="p-4">${category.subCategoryCount || 0}</td>
-        <td class="p-4 space-x-2">
-          <button onclick="editCategory('${category.id}')" class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded hover:bg-indigo-100">Edit</button>
-          <button onclick="deleteCategory('${category.id}')" class="bg-rose-50 text-rose-600 px-3 py-1 rounded hover:bg-rose-100">Delete</button>
-        </td>
-      </tr>
-    `;
-  });
+  const tbody = $("#categoryTable");
+  if (!tbody) return;
+  tbody.innerHTML = state.categories.map(c => `
+    <tr class="border-b border-slate-700 hover:bg-slate-800/50">
+      <td class="p-3"><img src="${c.image || 'https://via.placeholder.com/40'}" class="w-10 h-10 object-cover rounded-lg"></td>
+      <td class="p-3 font-medium text-white">${c.name || ''}</td>
+      <td class="p-3">
+        <button onclick="deleteCategory('${c.id}')" class="text-rose-400 hover:text-rose-300">Delete</button>
+      </td>
+    </tr>
+  `).join("");
 }
 
+// Render Orders
 function renderOrders() {
-  const table = $("#orderTable");
-  if (!table) return;
-  table.innerHTML = "";
-  state.orders.forEach(order => {
-    table.innerHTML += `
-      <tr class="hover:bg-slate-50 border-b border-slate-100">
-        <td class="p-4 font-bold text-indigo-600">${order.orderNumber || ""}</td>
-        <td class="p-4">${order.customerName || ""}</td>
-        <td class="p-4">${order.paymentMethod || ""}</td>
-        <td class="p-4">${order.paymentStatus || "Pending"}</td>
-        <td class="p-4">${order.deliveryStatus || "Pending"}</td>
-        <td class="p-4"><span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-bold">${order.status || "Pending"}</span></td>
-        <td class="p-4 font-bold">৳${currency(order.total)}</td>
-        <td class="p-4"><button onclick="viewOrder('${order.id}')" class="bg-slate-800 text-white px-3 py-1 rounded hover:bg-slate-900">View</button></td>
-      </tr>
-    `;
-  });
+  const tbody = $("#orderTable");
+  if (!tbody) return;
+  tbody.innerHTML = state.orders.map(o => `
+    <tr class="border-b border-slate-700 hover:bg-slate-800/50">
+      <td class="p-3 font-mono text-xs text-indigo-300">#${o.id.substring(0,6)}</td>
+      <td class="p-3">${o.customerName || 'Guest'}</td>
+      <td class="p-3">
+        <span class="px-2 py-1 rounded text-xs ${o.status === 'Completed' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">
+          ${o.status || 'Pending'}
+        </span>
+      </td>
+      <td class="p-3 font-bold">৳${currency(o.total)}</td>
+      <td class="p-3">
+        <button onclick="updateOrderStatus('${o.id}')" class="text-indigo-400 hover:underline">Change Status</button>
+      </td>
+    </tr>
+  `).join("");
 }
 
+// Render Customers
 function renderCustomers() {
-  const table = $("#customerTable");
-  if (!table) return;
-  table.innerHTML = "";
-  state.customers.forEach(user => {
-    table.innerHTML += `
-      <tr class="hover:bg-slate-50 border-b border-slate-100">
-        <td class="p-4"><img src="${user.photo || "https://via.placeholder.com/40"}" class="w-10 h-10 rounded-full object-cover"></td>
-        <td class="p-4 font-medium">${user.name || "N/A"}</td>
-        <td class="p-4">${user.phone || "N/A"}</td>
-        <td class="p-4">${user.email || "N/A"}</td>
-        <td class="p-4"><button onclick="viewCustomer('${user.id}')" class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded hover:bg-indigo-100">Details</button></td>
-      </tr>
-    `;
-  });
+  const tbody = $("#customerTable");
+  if (!tbody) return;
+  tbody.innerHTML = state.customers.map(c => `
+    <tr class="border-b border-slate-700">
+      <td class="p-3 text-white">${c.name || 'Anonymous'}</td>
+      <td class="p-3">${c.email || 'N/A'}</td>
+      <td class="p-3">${c.phone || 'N/A'}</td>
+    </tr>
+  `).join("");
 }
 
-function renderCoupons() {
-  const table = $("#couponTable");
-  if (!table) return;
-  table.innerHTML = "";
-  state.coupons.forEach(coupon => {
-    table.innerHTML += `
-      <tr class="hover:bg-slate-50 border-b border-slate-100">
-        <td class="p-4 font-bold text-indigo-600">${coupon.code || ""}</td>
-        <td class="p-4">৳${coupon.amount || 0}</td>
-        <td class="p-4">${coupon.expiryDate || ""}</td>
-        <td class="p-4 space-x-2">
-          <button onclick="editCoupon('${coupon.id}')" class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded hover:bg-indigo-100">Edit</button>
-          <button onclick="deleteCoupon('${coupon.id}')" class="bg-rose-50 text-rose-600 px-3 py-1 rounded hover:bg-rose-100">Delete</button>
-        </td>
-      </tr>
-    `;
-  });
-}
-
+// Render Banners
 function renderBanners() {
-  const table = $("#bannerTable");
-  if (!table) return;
-  table.innerHTML = "";
-  state.banners.forEach(banner => {
-    table.innerHTML += `
-      <tr class="hover:bg-slate-50 border-b border-slate-100">
-        <td class="p-4"><img src="${banner.image || "https://via.placeholder.com/80x40"}" class="w-20 h-10 object-cover rounded"></td>
-        <td class="p-4 font-medium">${banner.title || ""}</td>
-        <td class="p-4">${banner.priority || 0}</td>
-        <td class="p-4 space-x-2">
-          <button onclick="editBanner('${banner.id}')" class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded hover:bg-indigo-100">Edit</button>
-          <button onclick="deleteBanner('${banner.id}')" class="bg-rose-50 text-rose-600 px-3 py-1 rounded hover:bg-rose-100">Delete</button>
-        </td>
-      </tr>
-    `;
-  });
+  const tbody = $("#bannerTable");
+  if (!tbody) return;
+  tbody.innerHTML = state.banners.map(b => `
+    <tr class="border-b border-slate-700">
+      <td class="p-3"><img src="${b.imageUrl}" class="h-12 w-24 object-cover rounded"></td>
+      <td class="p-3">${b.title || 'No Title'}</td>
+      <td class="p-3"><button onclick="deleteBanner('${b.id}')" class="text-rose-400">Delete</button></td>
+    </tr>
+  `).join("");
 }
 
+// Render Coupons
+function renderCoupons() {
+  const tbody = $("#couponTable");
+  if (!tbody) return;
+  tbody.innerHTML = state.coupons.map(cp => `
+    <tr class="border-b border-slate-700">
+      <td class="p-3 font-mono text-emerald-400">${cp.code}</td>
+      <td class="p-3">${cp.discount}%</td>
+      <td class="p-3"><button onclick="deleteCoupon('${cp.id}')" class="text-rose-400">Delete</button></td>
+    </tr>
+  `).join("");
+}
+
+// Render Live Chats
 function renderChats() {
-  const table = $("#chatTable");
-  if (!table) return;
-  table.innerHTML = "";
-  state.chats.forEach(chat => {
-    table.innerHTML += `
-      <tr class="hover:bg-slate-50 border-b border-slate-100">
-        <td class="p-4">${chat.uid || ""}</td>
-        <td class="p-4">${chat.lastMessage || ""}</td>
-        <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${chat.online ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}">${chat.online ? "Online" : "Offline"}</span></td>
-        <td class="p-4 text-xs text-slate-500">${chat.typing ? "Typing..." : "Idle"}</td>
-        <td class="p-4"><button onclick="openChat('${chat.id}')" class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">Open</button></td>
-      </tr>
-    `;
-  });
+  const list = $("#chatList");
+  if (!list) return;
+  list.innerHTML = state.chats.map(ch => `
+    <div onclick="selectChat('${ch.id}')" class="p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 mb-2">
+      <p class="font-bold text-sm text-white">${ch.userName || 'User'}</p>
+      <p class="text-xs text-slate-400 truncate">${ch.lastMessage || ''}</p>
+    </div>
+  `).join("");
 }
 
-// প্রোডাক্ট এড করার ফাংশন
-async function handleAddProduct() {
+// Render Notifications
+function renderNotifications() {
+  const list = $("#notificationList");
+  if (!list) return;
+  list.innerHTML = state.notifications.map(n => `
+    <div class="p-3 bg-slate-800/80 rounded-lg mb-2 text-sm text-slate-200">
+      <p class="font-semibold text-white">${n.title || 'Alert'}</p>
+      <p class="text-xs text-slate-400">${n.message || ''}</p>
+    </div>
+  `).join("");
+}
+
+// --- PRODUCT ACTIONS ---
+window.addProduct = async () => {
   try {
     const name = $("#productName")?.value.trim();
     const rawImages = $("#productImages")?.value.trim();
-    const price = Number($("#productPrice")?.value) || 0;
-    const stock = Number($("#productStock")?.value) || 0;
+    const price = $("#productPrice")?.value;
+    const stock = $("#productStock")?.value;
 
-    // ভ্যালিডেশন চেক
-    if (!name) {
-      toast("⚠️ প্রোডাক্টের নাম দিন!");
-      return;
-    }
-    if (!rawImages) {
-      toast("⚠️ অন্তত একটি ছবির URL লিংক দিন!");
+    if (!name || !rawImages || !price) {
+      toast("⚠️ নাম, ছবি ও মূল্য দেয়া বাধ্যতামূলক!");
       return;
     }
 
-    // ইমেজ লিংকগুলোকে আলাদা করা
-    const images = rawImages.split(",").map(url => url.trim()).filter(url => url !== "");
+    const images = rawImages.split(",").map(url => url.trim()).filter(Boolean);
 
-    // ফায়ারবেসে ডাটা পাঠানো
     await addDoc(collection(db, collections.products), {
-      name: name,
-      description: $("#productDescription")?.value.trim() || "",
+      name,
       brand: $("#productBrand")?.value.trim() || "",
-      categoryId: $("#productCategory")?.value.trim() || "",
-      sku: $("#productSku")?.value.trim() || "",
-      price: price,
-      salePrice: Number($("#productSalePrice")?.value) || price,
-      stock: stock,
-      badge: $("#productBadge")?.value.trim() || "",
-      rating: 0,
-      reviewCount: 0,
-      sales: 0,
-      views: 0,
-      status: "active",
-      images: images,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-
-    toast("✅ প্রোডাক্ট সফলভাবে যোগ হয়েছে!");
-    
-    // ইনপুট ফিল্ড খালি করা
-    $("#productName").value = "";
-    $("#productDescription").value = "";
-    $("#productBrand").value = "";
-    $("#productCategory").value = "";
-    $("#productSku").value = "";
-    $("#productPrice").value = "";
-    $("#productSalePrice").value = "";
-    $("#productStock").value = "";
-    $("#productBadge").value = "";
-    $("#productImages").value = "";
-
-  } catch (error) {
-    console.error("Product Add Error: ", error);
-    toast("❌ ভুল হয়েছে: " + error.message);
-  }
-}
-
-// বোতামে ইভেন্ট লিসেনার যুক্ত করা (পৃষ্ঠা লোড হওয়ার পর)
-document.addEventListener("DOMContentLoaded", () => {
-  const btnAdd = document.getElementById("btnAddProduct");
-  if (btnAdd) {
-    btnAdd.addEventListener("click", handleAddProduct);
-  }
-});
-
-window.updateProduct = async () => {
-  try {
-    const id = $("#productId").value;
-    if (!id) {
-      toast("Select a product first!");
-      return;
-    }
-    const rawImages = $("#productImages").value.trim();
-    const images = rawImages ? rawImages.split(",").map(url => url.trim()) : [];
-
-    await updateDoc(doc(db, collections.products, id), {
-      name: $("#productName").value,
-      description: $("#productDescription").value,
-      brand: $("#productBrand").value,
-      categoryId: $("#productCategory").value,
-      sku: $("#productSku").value,
-      price: Number($("#productPrice").value),
-      salePrice: Number($("#productSalePrice").value),
-      stock: Number($("#productStock").value),
-      badge: $("#productBadge").value,
+      categoryId: $("#productCategory")?.value || "",
+      description: $("#productDescription")?.value.trim() || "",
+      price: Number(price) || 0,
+      salePrice: Number($("#productSalePrice")?.value) || Number(price),
+      stock: Number(stock) || 0,
       images,
-      updatedAt: serverTimestamp()
-    });
-
-    toast("Product Updated!");
-  } catch (err) {
-    console.error(err);
-    toast("Update failed!");
-  }
-};
-
-window.deleteProduct = async id => {
-  if (confirm("Delete Product?")) {
-    await deleteDoc(doc(db, collections.products, id));
-    toast("Product Deleted");
-  }
-};
-
-// Category Image Links
-window.addCategory = async () => {
-  const imageUrl = $("#categoryImage").value.trim();
-  if (!imageUrl) { toast("Provide image URL!"); return; }
-  await addDoc(collection(db, collections.categories), {
-    name: $("#categoryName").value.trim(),
-    image: imageUrl,
-    subCategoryCount: 0,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  });
-  toast("Category Added!");
-  $("#categoryName").value = "";
-  $("#categoryImage").value = "";
-};
-
-window.editCategory = async id => {
-  const snapshot = await getDoc(doc(db, collections.categories, id));
-  if (!snapshot.exists()) return;
-  const data = snapshot.data();
-  $("#categoryId").value = id;
-  $("#categoryName").value = data.name;
-  $("#categoryImage").value = data.image || "";
-};
-
-window.updateCategory = async () => {
-  await updateDoc(doc(db, collections.categories, $("#categoryId").value), {
-    name: $("#categoryName").value,
-    image: $("#categoryImage").value,
-    updatedAt: serverTimestamp()
-  });
-  toast("Category Updated");
-};
-
-window.deleteCategory = async id => {
-  if (confirm("Delete Category?")) {
-    await deleteDoc(doc(db, collections.categories, id));
-    toast("Category Deleted");
-  }
-};
-
-// Banner Image Links
-window.addBanner = async () => {
-  const imageUrl = $("#bannerImage").value.trim();
-  if (!imageUrl) { toast("Provide Banner Image URL!"); return; }
-  await addDoc(collection(db, collections.banners), {
-    title: $("#bannerTitle").value,
-    subtitle: $("#bannerSubtitle").value,
-    link: $("#bannerLink").value,
-    priority: Number($("#bannerPriority").value) || 1,
-    image: imageUrl,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  });
-  toast("Banner Added!");
-};
-
-window.editBanner = async id => {
-  const snapshot = await getDoc(doc(db, collections.banners, id));
-  if (!snapshot.exists()) return;
-  const data = snapshot.data();
-  $("#bannerId").value = id;
-  $("#bannerTitle").value = data.title;
-  $("#bannerSubtitle").value = data.subtitle;
-  $("#bannerLink").value = data.link;
-  $("#bannerPriority").value = data.priority;
-  $("#bannerImage").value = data.image || "";
-};
-
-window.updateBanner = async () => {
-  await updateDoc(doc(db, collections.banners, $("#bannerId").value), {
-    title: $("#bannerTitle").value,
-    subtitle: $("#bannerSubtitle").value,
-    link: $("#bannerLink").value,
-    priority: Number($("#bannerPriority").value),
-    image: $("#bannerImage").value,
-    updatedAt: serverTimestamp()
-  });
-  toast("Banner Updated");
-};
-
-window.deleteBanner = async id => {
-  if (confirm("Delete Banner?")) {
-    await deleteDoc(doc(db, collections.banners, id));
-    toast("Banner Deleted");
-  }
-};
-
-// Coupons
-window.addCoupon = async () => {
-  await addDoc(collection(db, collections.coupons), {
-    code: $("#couponCode").value.trim().toUpperCase(),
-    amount: Number($("#couponAmount").value),
-    expiryDate: $("#couponExpiry").value,
-    active: true,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  });
-  toast("Coupon Added");
-};
-
-window.editCoupon = async id => {
-  const snapshot = await getDoc(doc(db, collections.coupons, id));
-  if (!snapshot.exists()) return;
-  const data = snapshot.data();
-  $("#couponId").value = id;
-  $("#couponCode").value = data.code;
-  $("#couponAmount").value = data.amount;
-  $("#couponExpiry").value = data.expiryDate;
-};
-
-window.updateCoupon = async () => {
-  await updateDoc(doc(db, collections.coupons, $("#couponId").value), {
-    code: $("#couponCode").value.toUpperCase(),
-    amount: Number($("#couponAmount").value),
-    expiryDate: $("#couponExpiry").value,
-    updatedAt: serverTimestamp()
-  });
-  toast("Coupon Updated");
-};
-
-window.deleteCoupon = async id => {
-  if (confirm("Delete Coupon?")) {
-    await deleteDoc(doc(db, collections.coupons, id));
-    toast("Coupon Deleted");
-  }
-};
-
-// Order Details
-window.viewOrder = async id => {
-  const snapshot = await getDoc(doc(db, collections.orders, id));
-  if (!snapshot.exists()) return;
-  const order = snapshot.data();
-  
-  const modal = $("#orderViewer");
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-
-  const viewerNum = $("#viewerNumber");
-  viewerNum.textContent = order.orderNumber || "";
-  viewerNum.dataset.id = id;
-
-  $("#viewerCustomer").textContent = order.customerName || "";
-  $("#viewerPhone").textContent = order.phone || "";
-  $("#viewerAddress").textContent = `${order.area || ""}, ${order.upazila || ""}, ${order.district || ""}`;
-  $("#viewerPayment").textContent = order.paymentMethod || "";
-  $("#viewerStatus").value = order.status || "Pending";
-  $("#viewerDelivery").value = order.deliveryStatus || "Pending";
-  $("#viewerPaymentStatus").value = order.paymentStatus || "Pending";
-
-  const items = $("#viewerItems");
-  items.innerHTML = "";
-  if (order.items) {
-    order.items.forEach(item => {
-      items.innerHTML += `
-        <div class="flex items-center gap-3 bg-slate-50 p-2 rounded border">
-          <img src="${item.image}" class="w-12 h-12 object-cover rounded">
-          <div>
-            <strong class="text-sm block">${item.name}</strong>
-            <p class="text-xs text-slate-500">${item.quantity} × ৳${currency(item.price)}</p>
-          </div>
-        </div>
-      `;
-    });
-  }
-};
-
-window.saveOrderStatus = async () => {
-  try {
-    const id = $("#viewerNumber").dataset.id;
-    if (!id) return;
-    await updateDoc(doc(db, collections.orders, id), {
-      status: $("#viewerStatus").value,
-      deliveryStatus: $("#viewerDelivery").value,
-      paymentStatus: $("#viewerPaymentStatus").value,
-      updatedAt: serverTimestamp()
-    });
-    toast("Order Status Saved");
-    $("#orderViewer").classList.add("hidden");
-  } catch (err) {
-    toast("Failed to save order status!");
-  }
-};
-
-window.viewCustomer = async id => {
-  const snapshot = await getDoc(doc(db, collections.users, id));
-  if (!snapshot.exists()) return;
-  const data = snapshot.data();
-  const modal = $("#customerModal");
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-
-  $("#customerImage").src = data.photo || "https://via.placeholder.com/80";
-  $("#customerName").textContent = data.name || "N/A";
-  $("#customerEmail").textContent = data.email || "";
-  $("#customerPhone").textContent = data.phone || "";
-  $("#customerAddress").textContent = `${data.area || ""}, ${data.upazila || ""}, ${data.district || ""}`;
-
-  const ordersQuery = query(collection(db, collections.orders), where("uid", "==", id));
-  const orderSnapshot = await getDocs(ordersQuery);
-  const history = $("#customerOrders");
-  history.innerHTML = "";
-  orderSnapshot.forEach(order => {
-    const item = order.data();
-    history.innerHTML += `
-      <div class="bg-slate-50 p-2 rounded border text-xs flex justify-between">
-        <strong>${item.orderNumber || ""}</strong>
-        <span>৳${currency(item.total)}</span>
-        <span class="text-indigo-600">${item.status}</span>
-      </div>
-    `;
-  });
-};
-
-window.openChat = async chatId => {
-  const modal = $("#chatModal");
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-  $("#adminChatUser").textContent = chatId;
-  const container = $("#adminChatMessages");
-
-  onSnapshot(
-    query(collection(db, collections.chats, chatId, collections.messages), orderBy("createdAt", "asc")),
-    snapshot => {
-      container.innerHTML = "";
-      snapshot.forEach(message => {
-        const data = message.data();
-        container.innerHTML += `
-          <div class="p-2 rounded text-xs max-w-[80%] ${data.sender === chatId ? "bg-white border self-start" : "bg-indigo-600 text-white self-end ml-auto"}">
-            ${data.text}
-          </div>
-        `;
-      });
-      container.scrollTop = container.scrollHeight;
-    }
-  );
-
-  $("#adminSend").onclick = async () => {
-    const text = $("#adminMessage").value.trim();
-    if (!text) return;
-    await addDoc(collection(db, collections.chats, chatId, collections.messages), {
-      sender: "admin",
-      type: "text",
-      text,
-      read: true,
       createdAt: serverTimestamp()
     });
-    await updateDoc(doc(db, collections.chats, chatId), {
-      lastMessage: text,
+
+    toast("✅ প্রোডাক্ট যোগ সফল হয়েছে!");
+    clearProductForm();
+  } catch (err) {
+    console.error(err);
+    toast("❌ ভুল হয়েছে: " + err.message);
+  }
+};
+
+window.editProduct = (id) => {
+  const p = state.products.find(item => item.id === id);
+  if (!p) return;
+  $("#productId").value = p.id;
+  $("#productName").value = p.name || "";
+  $("#productBrand").value = p.brand || "";
+  $("#productPrice").value = p.price || 0;
+  $("#productStock").value = p.stock || 0;
+  $("#productImages").value = p.images ? p.images.join(", ") : "";
+  $("#productDescription").value = p.description || "";
+};
+
+window.updateProduct = async () => {
+  const id = $("#productId")?.value;
+  if (!id) return toast("⚠️ এডিটের জন্য কোনো প্রোডাক্ট সিলেক্ট করেননি!");
+
+  try {
+    await updateDoc(doc(db, collections.products, id), {
+      name: $("#productName").value.trim(),
+      brand: $("#productBrand").value.trim(),
+      price: Number($("#productPrice").value) || 0,
+      stock: Number($("#productStock").value) || 0,
+      images: $("#productImages").value.split(",").map(s => s.trim()).filter(Boolean),
+      description: $("#productDescription").value.trim(),
       updatedAt: serverTimestamp()
     });
-    $("#adminMessage").value = "";
-  };
-};
-
-window.sendPromotionNotification = async () => {
-  const title = $("#notificationTitle").value.trim();
-  const message = $("#notificationMessage").value.trim();
-  if (!title || !message) { toast("Enter notification details!"); return; }
-  const users = await getDocs(collection(db, collections.users));
-  const tasks = [];
-  users.forEach(user => {
-    tasks.push(
-      addDoc(collection(db, collections.notifications), {
-        uid: user.id,
-        title,
-        message,
-        read: false,
-        type: "promotion",
-        createdAt: serverTimestamp()
-      })
-    );
-  });
-  await Promise.all(tasks);
-  toast("Notification Sent to all users!");
-  $("#notificationTitle").value = "";
-  $("#notificationMessage").value = "";
-};
-
-window.exportProducts = () => {
-  const rows = [["Name", "Brand", "Price", "Sale Price", "Stock"]];
-  state.products.forEach(item => {
-    rows.push([item.name, item.brand, item.price, item.salePrice, item.stock]);
-  });
-  const csv = rows.map(r => r.join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "products.csv";
-  link.click();
-};
-
-// Auth Guard & Logout
-onAuthStateChanged(auth, user => {
-  if (!user) {
-    location.href = "login.html";
-    return;
+    toast("✅ প্রোডাক্ট আপডেট সম্পন্ন হয়েছে!");
+    clearProductForm();
+  } catch (err) {
+    toast("❌ আপডেট ব্যর্থ: " + err.message);
   }
-  loadDashboard();
+};
+
+window.deleteProduct = async (id) => {
+  if (confirm("আপনি কি নিশ্চিত এই প্রোডাক্টটি ডিলেট করবেন?")) {
+    await deleteDoc(doc(db, collections.products, id));
+    toast("🗑️ প্রোডাক্ট মুছে ফেলা হয়েছে!");
+  }
+};
+
+function clearProductForm() {
+  if($("#productId")) $("#productId").value = "";
+  if($("#productName")) $("#productName").value = "";
+  if($("#productBrand")) $("#productBrand").value = "";
+  if($("#productPrice")) $("#productPrice").value = "";
+  if($("#productStock")) $("#productStock").value = "";
+  if($("#productImages")) $("#productImages").value = "";
+  if($("#productDescription")) $("#productDescription").value = "";
+}
+
+// --- CATEGORY ACTIONS ---
+window.addCategory = async () => {
+  const name = $("#categoryName")?.value.trim();
+  const image = $("#categoryImage")?.value.trim();
+  if (!name) return toast("⚠️ ক্যাটাগরির নাম দিন!");
+
+  await addDoc(collection(db, collections.categories), { name, image: image || "" });
+  toast("✅ ক্যাটাগরি সফলভাবে তৈরি হয়েছে!");
+  $("#categoryName").value = "";
+  if($("#categoryImage")) $("#categoryImage").value = "";
+};
+
+window.deleteCategory = async (id) => {
+  if (confirm("ক্যাটাগরি মুছে ফেলতে চান?")) {
+    await deleteDoc(doc(db, collections.categories, id));
+    toast("🗑️ ক্যাটাগরি ডিলেট হয়েছে!");
+  }
+};
+
+// --- BANNER ACTIONS ---
+window.addBanner = async () => {
+  const imageUrl = $("#bannerImage")?.value.trim();
+  const title = $("#bannerTitle")?.value.trim();
+  if (!imageUrl) return toast("⚠️ ব্যানারের ছবি লিঙক দিন!");
+
+  await addDoc(collection(db, collections.banners), { imageUrl, title: title || "" });
+  toast("✅ ব্যানার এড হয়েছে!");
+  $("#bannerImage").value = "";
+};
+
+window.deleteBanner = async (id) => {
+  await deleteDoc(doc(db, collections.banners, id));
+  toast("🗑️ ব্যানার ডিলেট হয়েছে!");
+};
+
+// --- COUPON ACTIONS ---
+window.addCoupon = async () => {
+  const code = $("#couponCode")?.value.trim();
+  const discount = $("#couponDiscount")?.value;
+  if (!code || !discount) return toast("⚠️ কুপন কোড এবং ডিসকাউন্ট দিন!");
+
+  await addDoc(collection(db, collections.coupons), {
+    code: code.toUpperCase(),
+    discount: Number(discount),
+    createdAt: serverTimestamp()
+  });
+  toast("✅ কুপন যুক্ত করা হয়েছে!");
+};
+
+window.deleteCoupon = async (id) => {
+  await deleteDoc(doc(db, collections.coupons, id));
+  toast("🗑️ কুপন সরানো হয়েছে!");
+};
+
+// --- AUTHENTICATION & INITIALIZATION ---
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    initDataSync();
+  } else {
+    window.location.href = "login.html";
+  }
 });
 
-window.addEventListener("load", () => {
-  $("#adminLogout")?.addEventListener("click", async () => {
-    if (confirm("Logout from admin?")) {
-      await signOut(auth);
-      location.href = "login.html";
-    }
-  });
+window.addEventListener("DOMContentLoaded", () => {
+  $("#adminLogout")?.addEventListener("click", () => signOut(auth));
 });
