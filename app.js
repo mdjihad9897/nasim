@@ -2158,17 +2158,19 @@ console.log(
 
 );
 
+// Global User Logic
 let currentUser = null;
 
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
-  
   if (user) {
-    state.user = user;
+    if (typeof state !== 'undefined') state.user = user;
     await loadUserProfileData(user);
   } else {
-    state.user = null;
-    state.profile = null;
+    if (typeof state !== 'undefined') {
+      state.user = null;
+      state.profile = null;
+    }
     resetProfileUI();
   }
 });
@@ -2181,20 +2183,22 @@ async function loadUserProfileData(user) {
     if (profileName) profileName.textContent = user.displayName || "User";
     if (editName) editName.value = user.displayName || "";
 
-    const userDocRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userDocRef);
+    if (typeof db !== 'undefined' && typeof doc !== 'undefined' && typeof getDoc !== 'undefined') {
+      const userDocRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userDocRef);
 
-    if (userSnap.exists()) {
-      const userData = userSnap.data();
-      state.profile = userData;
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        if (typeof state !== 'undefined') state.profile = userData;
 
-      const profilePhone = document.getElementById("profilePhone");
-      const editPhone = document.getElementById("editPhone");
-      const editAddress = document.getElementById("editAddress");
+        const profilePhone = document.getElementById("profilePhone");
+        const editPhone = document.getElementById("editPhone");
+        const editAddress = document.getElementById("editAddress");
 
-      if (profilePhone) profilePhone.textContent = userData.phone || "";
-      if (editPhone) editPhone.value = userData.phone || "";
-      if (editAddress) editAddress.value = userData.address || "";
+        if (profilePhone) profilePhone.textContent = userData.phone || "";
+        if (editPhone) editPhone.value = userData.phone || "";
+        if (editAddress) editAddress.value = userData.address || "";
+      }
     }
   } catch (error) {
     console.error("Profile load error:", error);
@@ -2215,23 +2219,19 @@ function resetProfileUI() {
   if (editAddress) editAddress.value = "";
 }
 
-const profileNavBtn = document.querySelector('.nav-item[data-page="profile"]');
-const menuProfileBtn = document.getElementById("menuProfile");
+// Profile Click Only Navigation
+document.addEventListener("DOMContentLoaded", () => {
+  const profileNavBtn = document.querySelector('.nav-item[data-page="profile"]');
+  const menuProfileBtn = document.getElementById("menuProfile");
 
-function handleProfileClick(event) {
-  event.preventDefault();
-
-  if (!currentUser) {
-    window.location.href = "login.html";
-  } else {
-    if (typeof showPage === "function") {
-      showPage("profile");
-    } else {
-      const profilePage = document.getElementById("profilePage");
-      if (profilePage) profilePage.classList.remove("hidden");
+  function handleProfileClick(event) {
+    if (!currentUser) {
+      event.preventDefault();
+      event.stopPropagation();
+      window.location.href = "login.html";
     }
   }
-}
 
-if (profileNavBtn) profileNavBtn.addEventListener("click", handleProfileClick);
-if (menuProfileBtn) menuProfileBtn.addEventListener("click", handleProfileClick);
+  if (profileNavBtn) profileNavBtn.addEventListener("click", handleProfileClick);
+  if (menuProfileBtn) menuProfileBtn.addEventListener("click", handleProfileClick);
+});
