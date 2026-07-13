@@ -27,7 +27,8 @@ import {
   uploadProfileImage,
   pushNotification,
   uploadChatImage,
-  applyCoupon
+  applyCoupon,
+  signOut
 } from "./firebase.js";
 
 const $ = selector => document.querySelector(selector);
@@ -103,15 +104,19 @@ function showDialog(title, message, callback) {
   if (!$("#dialogTitle")) return;
   $("#dialogTitle").textContent = title;
   $("#dialogMessage").textContent = message;
-  dialog.classList.remove("hidden");
+  if (dialog) dialog.classList.remove("hidden");
 
-  $("#dialogConfirm").onclick = () => {
-    dialog.classList.add("hidden");
-    callback?.();
-  };
-  $("#dialogCancel").onclick = () => {
-    dialog.classList.add("hidden");
-  };
+  if ($("#dialogConfirm")) {
+    $("#dialogConfirm").onclick = () => {
+      if (dialog) dialog.classList.add("hidden");
+      callback?.();
+    };
+  }
+  if ($("#dialogCancel")) {
+    $("#dialogCancel").onclick = () => {
+      if (dialog) dialog.classList.add("hidden");
+    };
+  }
 }
 
 function openModal(modal) { if (modal) modal.classList.add("active"); }
@@ -284,62 +289,67 @@ if (priceFilter) priceFilter.onchange = filterProducts;
 if (ratingFilter) ratingFilter.onchange = filterProducts;
 if (stockFilter) stockFilter.onchange = filterProducts;
 if (sortFilter) sortFilter.onchange = filterProducts;
-
 window.viewProduct = id => {
   const product = state.products.find(item => item.id === id);
   if (!product) return;
 
   state.selectedProduct = product;
-  $("#productMainImage").src = product.images[0];
-  $("#productTitle").textContent = product.name;
-  $("#productBadge").textContent = product.badge;
-  $("#productBrand").textContent = product.brand;
-  $("#productSKU").textContent = product.sku;
-  $("#productStock").textContent = product.stock > 0 ? "In Stock" : "Out Of Stock";
-  $("#productDiscountPrice").textContent = currency(product.salePrice);
-  $("#productOriginalPrice").textContent = currency(product.price);
-  $("#productDescription").textContent = product.description;
-  $("#productQty").value = 1;
+  if ($("#productMainImage")) $("#productMainImage").src = product.images[0];
+  if ($("#productTitle")) $("#productTitle").textContent = product.name;
+  if ($("#productBadge")) $("#productBadge").textContent = product.badge;
+  if ($("#productBrand")) $("#productBrand").textContent = product.brand;
+  if ($("#productSKU")) $("#productSKU").textContent = product.sku;
+  if ($("#productStock")) $("#productStock").textContent = product.stock > 0 ? "In Stock" : "Out Of Stock";
+  if ($("#productDiscountPrice")) $("#productDiscountPrice").textContent = currency(product.salePrice);
+  if ($("#productOriginalPrice")) $("#productOriginalPrice").textContent = currency(product.price);
+  if ($("#productDescription")) $("#productDescription").textContent = product.description;
+  if ($("#productQty")) $("#productQty").value = 1;
 
   const starContainer = $("#productStars");
-  starContainer.innerHTML = "";
-  for (let i = 1; i <= 5; i++) {
-    starContainer.innerHTML += `
-      <svg width="18" height="18" viewBox="0 0 24 24">
-        <path fill="${i <= Math.round(product.rating) ? "#fbbf24" : "#d1d5db"}" d="M12 2l3 7h7l-6 5 2 8-6-4-6 4 2-8-6-5h7z"/>
-      </svg>
-    `;
+  if (starContainer) {
+    starContainer.innerHTML = "";
+    for (let i = 1; i <= 5; i++) {
+      starContainer.innerHTML += `
+        <svg width="18" height="18" viewBox="0 0 24 24">
+          <path fill="${i <= Math.round(product.rating) ? "#fbbf24" : "#d1d5db"}" d="M12 2l3 7h7l-6 5 2 8-6-4-6 4 2-8-6-5h7z"/>
+        </svg>
+      `;
+    }
   }
 
-  $("#productReviewCount").textContent = `${product.reviewCount} Reviews`;
+  if ($("#productReviewCount")) $("#productReviewCount").textContent = `${product.reviewCount} Reviews`;
   const specs = $("#productSpecifications");
-  specs.innerHTML = "";
-  if (product.specifications) {
-    Object.entries(product.specifications).forEach(([key, value]) => {
-      specs.innerHTML += `<div class="spec-row"><strong>${key}</strong><span>${value}</span></div>`;
-    });
+  if (specs) {
+    specs.innerHTML = "";
+    if (product.specifications) {
+      Object.entries(product.specifications).forEach(([key, value]) => {
+        specs.innerHTML += `<div class="spec-row"><strong>${key}</strong><span>${value}</span></div>`;
+      });
+    }
   }
 
   const thumbs = $("#productThumbnails");
-  thumbs.innerHTML = "";
-  product.images.forEach((image, index) => {
-    const img = document.createElement("img");
-    img.src = image;
-    if (index === 0) img.classList.add("active");
-    img.onclick = () => {
-      $("#productMainImage").src = image;
-      thumbs.querySelectorAll("img").forEach(item => item.classList.remove("active"));
-      img.classList.add("active");
-    };
-    thumbs.appendChild(img);
-  });
+  if (thumbs) {
+    thumbs.innerHTML = "";
+    product.images.forEach((image, index) => {
+      const img = document.createElement("img");
+      img.src = image;
+      if (index === 0) img.classList.add("active");
+      img.onclick = () => {
+        $("#productMainImage").src = image;
+        thumbs.querySelectorAll("img").forEach(item => item.classList.remove("active"));
+        img.classList.add("active");
+      };
+      thumbs.appendChild(img);
+    });
+  }
 
   openModal(productModal);
 };
 
 if ($("#closeProductModal")) $("#closeProductModal").onclick = () => closeModal(productModal);
-if ($("#qtyPlus")) $("#qtyPlus").onclick = () => { const input = $("#productQty"); input.value = Number(input.value) + 1; };
-if ($("#qtyMinus")) $("#qtyMinus").onclick = () => { const input = $("#productQty"); if (Number(input.value) > 1) input.value = Number(input.value) - 1; };
+if ($("#qtyPlus")) $("#qtyPlus").onclick = () => { const input = $("#productQty"); if (input) input.value = Number(input.value) + 1; };
+if ($("#qtyMinus")) $("#qtyMinus").onclick = () => { const input = $("#productQty"); if (input && Number(input.value) > 1) input.value = Number(input.value) - 1; };
 
 window.toggleWishlist = async productId => {
   if (!state.user) { location.href = "login.html"; return; }
@@ -404,7 +414,7 @@ window.deleteCart = async (id) => {
   showToast("Cart updated");
 };
 
-// Global User State & Data Loading
+// Auth State & UI Updates
 onAuthStateChanged(auth, async (user) => {
   state.user = user;
 
@@ -503,7 +513,6 @@ function renderNotifications(list) {
   if (notificationCount) notificationCount.textContent = list.length;
 }
 
-// Global App Initialization
 function initializeApp() {
   loadBanners(list => {
     state.banners = list;
@@ -547,43 +556,128 @@ document.querySelectorAll(".nav-item").forEach(button => {
     document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
     button.classList.add("active");
 
-    document.querySelector("main").classList.add("hidden");
+    if ($("main")) $("main").classList.add("hidden");
     if ($("#profilePage")) $("#profilePage").classList.add("hidden");
     if (cartDrawer) cartDrawer.classList.remove("active");
     if (chatPanel) chatPanel.classList.remove("active");
 
     if (page === "home") {
-      document.querySelector("main").classList.remove("hidden");
+      if ($("main")) $("main").classList.remove("hidden");
     } else if (page === "profile") {
-      $("#profilePage").classList.remove("hidden");
+      if ($("#profilePage")) $("#profilePage").classList.remove("hidden");
     } else if (page === "wishlist") {
-      $("#profilePage").classList.remove("hidden");
+      if ($("#profilePage")) $("#profilePage").classList.remove("hidden");
       setTimeout(() => { if (wishlistList) wishlistList.scrollIntoView({ behavior: "smooth" }); }, 100);
     } else if (page === "cart") {
-      document.querySelector("main").classList.remove("hidden");
+      if ($("main")) $("main").classList.remove("hidden");
       if (cartDrawer) cartDrawer.classList.add("active");
     } else if (page === "chat") {
-      document.querySelector("main").classList.remove("hidden");
+      if ($("main")) $("main").classList.remove("hidden");
       if (chatPanel) chatPanel.classList.add("active");
     }
   };
 });
 
-if ($("#menuProfile")) {
-  $("#menuProfile").onclick = (e) => {
-    e.preventDefault();
-    if (!state.user) { location.href = "login.html"; return; }
-    if (drawer) drawer.classList.remove("active");
-    if (drawerOverlay) drawerOverlay.classList.remove("active");
-    document.querySelector('[data-page="profile"]').click();
-  };
+// Sidebar & Settings Action Logic
+function closeDrawer() {
+  if (drawer) drawer.classList.remove("active");
+  if (drawerOverlay) drawerOverlay.classList.remove("active");
 }
 
-// Drawer & Modal Event Listeners
+function bindMenuClick(selectors, handler) {
+  selectors.forEach(sel => {
+    const el = $(sel);
+    if (el) {
+      el.onclick = (e) => {
+        e.preventDefault();
+        closeDrawer();
+        handler();
+      };
+    }
+  });
+}
+
+// My Profile
+bindMenuClick(["#menuProfile", "[data-action='profile']"], () => {
+  if (!state.user) { location.href = "login.html"; return; }
+  const btn = document.querySelector('[data-page="profile"]');
+  if (btn) btn.click();
+});
+
+// My Orders
+bindMenuClick(["#menuOrders", "[data-action='orders']"], () => {
+  if (!state.user) { location.href = "login.html"; return; }
+  const btn = document.querySelector('[data-page="profile"]');
+  if (btn) btn.click();
+  setTimeout(() => { if (orderHistory) orderHistory.scrollIntoView({ behavior: "smooth" }); }, 150);
+});
+
+// Wishlist
+bindMenuClick(["#menuWishlist", "[data-action='wishlist']"], () => {
+  if (!state.user) { location.href = "login.html"; return; }
+  const btn = document.querySelector('[data-page="wishlist"]');
+  if (btn) btn.click();
+});
+
+// Chat
+bindMenuClick(["#menuChat", "[data-action='chat']"], () => {
+  if (!state.user) { location.href = "login.html"; return; }
+  const btn = document.querySelector('[data-page="chat"]');
+  if (btn) btn.click();
+});
+
+// Notifications
+bindMenuClick(["#menuNotifications", "#notificationBtn", "[data-action='notifications']"], () => {
+  const count = state.notifications.length;
+  showToast(count > 0 ? `You have ${count} new notifications` : "No new notifications");
+});
+
+// Settings
+bindMenuClick(["#menuSettings", "#menuSetting", "[data-action='settings']"], () => {
+  if (!state.user) { location.href = "login.html"; return; }
+  const btn = document.querySelector('[data-page="profile"]');
+  if (btn) btn.click();
+  showToast("You can edit your profile & address here");
+});
+
+// Help Center
+bindMenuClick(["#menuHelp", "[data-action='help']"], () => {
+  showDialog("Help Center", "Need assistance? Click 'Chat' to speak with our support team instantly!");
+});
+
+// Contact Us
+bindMenuClick(["#menuContact", "[data-action='contact']"], () => {
+  showDialog("Contact Us", "Customer Care Hotline: +880 1700-000000\nEmail: support@store.com");
+});
+
+// About
+bindMenuClick(["#menuAbout", "[data-action='about']"], () => {
+  showDialog("About Us", "Welcome to our E-Commerce Store! We bring high-quality products directly to your doorstep with fast delivery.");
+});
+
+// Logout
+bindMenuClick(["#menuLogout", "#logoutBtn", "[data-action='logout']"], () => {
+  if (!state.user) {
+    location.href = "login.html";
+    return;
+  }
+  showDialog("Logout", "Are you sure you want to log out?", async () => {
+    try {
+      await signOut(auth);
+      showToast("Logged out successfully");
+      setTimeout(() => location.href = "login.html", 500);
+    } catch (e) {
+      console.error(e);
+      showToast("Error logging out", "alert");
+    }
+  });
+});
+
+// Drawer Controls
 if ($("#mobileMenuBtn")) $("#mobileMenuBtn").onclick = () => { drawer.classList.add("active"); drawerOverlay.classList.add("active"); };
 if ($("#moreMenuBtn")) $("#moreMenuBtn").onclick = () => { drawer.classList.add("active"); drawerOverlay.classList.add("active"); };
-if ($("#drawerClose")) $("#drawerClose").onclick = () => { drawer.classList.remove("active"); drawerOverlay.classList.remove("active"); };
-if (drawerOverlay) drawerOverlay.onclick = () => { drawer.classList.remove("active"); drawerOverlay.classList.remove("active"); };
+if ($("#drawerClose")) $("#drawerClose").onclick = () => closeDrawer();
+if (drawerOverlay) drawerOverlay.onclick = () => closeDrawer();
 if ($("#closeCart")) $("#closeCart").onclick = () => cartDrawer.classList.remove("active");
 if ($("#closeChatPanel")) $("#closeChatPanel").onclick = () => chatPanel.classList.remove("active");
 
@@ -595,6 +689,6 @@ if ($("#saveProfileButton")) {
       phone: $("#editPhone").value,
       address: $("#editAddress").value
     });
-    showToast("Profile saved");
+    showToast("Profile saved successfully!");
   };
 }
