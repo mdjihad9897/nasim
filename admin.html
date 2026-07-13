@@ -1,1155 +1,450 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="bn">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Full Admin Panel</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-<meta charset="UTF-8">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --text-muted: #6b7280;
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background-color: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
 
-<title>Admin Dashboard</title>
+    /* Sidebar Styles */
+    .sidebar {
+      width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
 
-<link rel="stylesheet" href="style.css">
+    .brand-logo { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 25px; }
+    .brand-logo span { color: var(--primary); }
+
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .nav-item {
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: 0.2s;
+    }
+    .nav-item:hover, .nav-item.active { background: #eff6ff; color: var(--primary); }
+    .badge { background: var(--primary); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 20px; }
+
+    /* Main Content Area */
+    .main-wrapper { margin-left: 260px; flex: 1; padding: 25px; }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      background: var(--surface);
+      padding: 15px 20px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Cards & Grids */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .stat-card { background: var(--surface); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); }
+    .stat-card h4 { color: var(--text-muted); font-size: 13px; margin-bottom: 8px; }
+    .stat-card h2 { font-size: 24px; font-weight: 800; }
+
+    .panel-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    @media (min-width: 1024px) { .panel-grid { grid-template-columns: 380px 1fr; } }
+
+    .admin-card { background: var(--surface); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .admin-card h3 { font-size: 18px; margin-bottom: 15px; }
+
+    /* Form Inputs */
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); font-size: 14px; outline: none;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); background: #fff; }
+
+    .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .btn-submit:hover { background: var(--primary-dark); }
+
+    /* Table Styles */
+    .table-box { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
+    th, td { padding: 12px; border-bottom: 1px solid var(--border); }
+    th { background: var(--bg); color: var(--text-muted); font-weight: 700; }
+    td img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
+    
+    .btn-del { background: #fef2f2; color: var(--danger); border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="brand-logo">Admin<span>Panel</span></div>
+    <ul class="nav-list">
+      <li class="nav-item active" onclick="openTab('dashboard-tab', this)">Dashboard</li>
+      <li class="nav-item" onclick="openTab('products-tab', this)">Products</li>
+      <li class="nav-item" onclick="openTab('categories-tab', this)">Categories</li>
+      <li class="nav-item" onclick="openTab('orders-tab', this)">Orders <span class="badge" id="orderCount">0</span></li>
+      <li class="nav-item" onclick="openTab('customers-tab', this)">Customers</li>
+      <li class="nav-item" onclick="openTab('banners-tab', this)">Banners</li>
+      <li class="nav-item" onclick="openTab('coupons-tab', this)">Coupons</li>
+      <li class="nav-item" onclick="openTab('chat-tab', this)">Live Chat</li>
+      <li class="nav-item" onclick="openTab('notifications-tab', this)">Notifications</li>
+    </ul>
+  </aside>
+
+  <!-- Main Container -->
+  <main class="main-wrapper">
+    <header class="header-bar">
+      <h2 id="pageTitle">Dashboard Overview</h2>
+      <div><strong>Admin Status:</strong> Online</div>
+    </header>
+
+    <!-- TAB 1: Dashboard -->
+    <section id="dashboard-tab" class="tab-content active">
+      <div class="card-grid">
+        <div class="stat-card"><h4>Total Sales</h4><h2>৳ <span id="dashSales">0</span></h2></div>
+        <div class="stat-card"><h4>Total Orders</h4><h2 id="dashOrders">0</h2></div>
+        <div class="stat-card"><h4>Total Products</h4><h2 id="dashProducts">0</h2></div>
+        <div class="stat-card"><h4>Total Customers</h4><h2 id="dashCustomers">0</h2></div>
+      </div>
+    </section>
+
+    <!-- TAB 2: Products -->
+    <section id="products-tab" class="tab-content">
+      <div class="panel-grid">
+        <div class="admin-card">
+          <h3>Add Product</h3>
+          <form id="productForm">
+            <div class="form-group"><label>Title</label><input type="text" id="pTitle" required></div>
+            <div class="form-group"><label>Price (৳)</label><input type="number" id="pPrice" required></div>
+            <div class="form-group"><label>Category</label><input type="text" id="pCategory" required></div>
+            <div class="form-group"><label>Image URL (Direct Link)</label><input type="url" id="pImg" placeholder="https://..." required></div>
+            <div class="form-group"><label>Description</label><textarea id="pDesc"></textarea></div>
+            <button class="btn-submit" type="submit">Upload Product</button>
+          </form>
+        </div>
+        <div class="admin-card">
+          <h3>Product List</h3>
+          <div class="table-box">
+            <table>
+              <thead><tr><th>Image</th><th>Title</th><th>Price</th><th>Category</th><th>Action</th></tr></thead>
+              <tbody id="adminProductTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: Categories -->
+    <section id="categories-tab" class="tab-content">
+      <div class="panel-grid">
+        <div class="admin-card">
+          <h3>Add Category</h3>
+          <form id="categoryForm">
+            <div class="form-group"><label>Category Name</label><input type="text" id="cName" required></div>
+            <div class="form-group"><label>Icon / Image URL</label><input type="url" id="cImg" required></div>
+            <button class="btn-submit" type="submit">Save Category</button>
+          </form>
+        </div>
+        <div class="admin-card">
+          <h3>Category List</h3>
+          <div class="table-box">
+            <table>
+              <thead><tr><th>Icon</th><th>Name</th><th>Action</th></tr></thead>
+              <tbody id="adminCategoryTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+<!-- TAB 4: Orders Management -->
+<section id="orders-tab" class="tab-content">
+  <div class="admin-card">
+    <h3>অর্ডার ব্যবস্থাপনা (Orders List)</h3>
+    <div class="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>অর্ডার আইডি</th>
+            <th>গ্রাহক</th>
+            <th>ফোন নাম্বার</th>
+            <th>মোট টাকা</th>
+            <th>পেমেন্ট মেথড</th>
+            <th>স্ট্যাটাস</th>
+            <th>অ্যাকশন</th>
+          </tr>
+        </thead>
+        <tbody id="adminOrderTable">
+          <!-- Firebase থেকে ডাটা এখানে আসবে -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- TAB 5: Customers -->
+<section id="customers-tab" class="tab-content">
+  <div class="admin-card">
+    <h3>গ্রাহকদের তালিকা (Customers)</h3>
+    <div class="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>নাম</th>
+            <th>ইমেইল / ফোন</th>
+            <th>মোট অর্ডার</th>
+            <th>যোগদানের তারিখ</th>
+            <th>অ্যাকশন</th>
+          </tr>
+        </thead>
+        <tbody id="adminCustomerTable">
+          <!-- Customer rows -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- TAB 6: Banners & Sliders -->
+<section id="banners-tab" class="tab-content">
+  <div class="panel-grid">
+    <div class="admin-card">
+      <h3>নতুন ব্যানার যুক্ত করুন</h3>
+      <form id="bannerForm">
+        <div class="form-group">
+          <label>ব্যানার টাইটেল</label>
+          <input type="text" id="bTitle" placeholder="যেমন: Summer Sale Offer" required>
+        </div>
+        <div class="form-group">
+          <label>ব্যানার ইমেজের লিংক (Direct URL)</label>
+          <input type="url" id="bImg" placeholder="https://i.ibb.co/xxxx/banner.jpg" required>
+        </div>
+        <div class="form-group">
+          <label>ক্লিক লিংক / প্রোডাক্ট URL (Optional)</label>
+          <input type="url" id="bLink" placeholder="https://...">
+        </div>
+        <button class="btn-submit" type="submit">ব্যানার সেভ করুন</button>
+      </form>
+    </div>
+
+    <div class="admin-card">
+      <h3>বর্তমান ব্যানার সমূহ</h3>
+      <div class="table-box">
+        <table>
+          <thead>
+            <tr>
+              <th>ছবি</th>
+              <th>টাইটেল</th>
+              <th>অ্যাকশন</th>
+            </tr>
+          </thead>
+          <tbody id="adminBannerTable">
+            <!-- Banner rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TAB 7: Coupons / Discounts -->
+<section id="coupons-tab" class="tab-content">
+  <div class="panel-grid">
+    <div class="admin-card">
+      <h3>নতুন কুপন তৈরি করুন</h3>
+      <form id="couponForm">
+        <div class="form-group">
+          <label>কুপন কোড (Coupon Code)</label>
+          <input type="text" id="cpCode" placeholder="যেমন: EID50" style="text-transform: uppercase;" required>
+        </div>
+        <div class="form-group">
+          <label>ডিসকাউন্ট পরিমাণ (৳ বা %)</label>
+          <input type="number" id="cpAmount" placeholder="যেমন: 100" required>
+        </div>
+        <div class="form-group">
+          <label>ডিসকাউন্টের ধরন</label>
+          <select id="cpType">
+            <option value="fixed">Fixed Amount (৳)</option>
+            <option value="percentage">Percentage (%)</option>
+          </select>
+        </div>
+        <button class="btn-submit" type="submit">কুপন তৈরি করুন</button>
+      </form>
+    </div>
+
+    <div class="admin-card">
+      <h3>সক্রিয় কুপন সমূহ</h3>
+      <div class="table-box">
+        <table>
+          <thead>
+            <tr>
+              <th>কোড</th>
+              <th>ডিসকাউন্ট</th>
+              <th>ধরন</th>
+              <th>অ্যাকশন</th>
+            </tr>
+          </thead>
+          <tbody id="adminCouponTable">
+            <!-- Coupon rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TAB 8: Live Chat -->
+<section id="chat-tab" class="tab-content">
+  <div class="chat-container">
+    <div class="chat-sidebar">
+      <h4>গ্রাহকদের ম্যাসেজ</h4>
+      <div class="chat-user-list" id="chatUserList">
+        <!-- ইউজার চ্যাট লিস্ট -->
+      </div>
+    </div>
+    <div class="chat-main">
+      <div class="chat-header" id="currentChatUser">কাস্টমার সিলেক্ট করুন</div>
+      <div class="chat-box" id="chatMessages">
+        <p style="text-align: center; color: var(--text-muted); margin-top: 50px;">চ্যাট শুরু করতে বামপাশের তালিকা থেকে যেকোনো একজন গ্রাহককে নির্বাচন করুন।</p>
+      </div>
+      <form id="chatForm" class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="উত্তর লিখুন..." required>
+        <button type="submit" class="btn-submit" style="width: auto; padding: 11px 25px;">পাঠান</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- TAB 9: Push Notifications -->
+<section id="notifications-tab" class="tab-content">
+  <div class="admin-card" style="max-width: 600px;">
+    <h3>সব গ্রাহককে নোটিফিকেশন পাঠান</h3>
+    <form id="notificationForm">
+      <div class="form-group">
+        <label>নোটিফিকেশন শিরোনাম (Title)</label>
+        <input type="text" id="notifTitle" placeholder="যেমন: বিশেষ ছাড়!" required>
+      </div>
+      <div class="form-group">
+        <label>বার বার্তা (Message)</label>
+        <textarea id="notifBody" placeholder="গ্রাহকদের জন্য আপনার মেসেজটি লিখুন..." required></textarea>
+      </div>
+      <button class="btn-submit" type="submit">নোটিফিকেশন পাঠান</button>
+    </form>
+  </div>
+</section>
+
+<!-- Additional CSS Styles for Chat & Select Controls -->
 <style>
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Roboto, sans-serif;
-  }
-
-  body {
-    background-color: #f1f5f9;
-    color: #334155;
-    display: flex;
-    min-height: 100vh;
-  }
-
-  svg, img {
-    max-width: 100% !important;
-    height: auto !important;
-  }
-
-  .admin-container {
-    display: flex;
-    width: 100%;
-  }
-
-  .sidebar {
-    width: 250px;
-    background: #0f172a;
-    color: #fff;
-    padding: 20px;
-    min-height: 100vh;
-  }
-
-  .sidebar h2 {
-    font-size: 20px;
-    margin-bottom: 25px;
-    color: #38bdf8;
-  }
-
-  .sidebar nav a, .sidebar nav button {
-    display: block;
-    width: 100%;
-    padding: 12px 15px;
-    color: #94a3b8;
-    text-decoration: none;
-    border: none;
-    background: transparent;
-    text-align: left;
-    border-radius: 8px;
-    margin-bottom: 5px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  .sidebar nav a:hover, .sidebar nav button:hover, .sidebar nav .active {
-    background: #1e293b;
-    color: #fff;
-  }
-
-  .main-content {
-    flex: 1;
-    padding: 30px;
-    overflow-y: auto;
-  }
-
-  .card-grid {
+  .chat-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-  }
-
-  .card {
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  }
-
-  .card h3 {
-    font-size: 14px;
-    color: #64748b;
-    margin-bottom: 8px;
-  }
-
-  .card .value {
-    font-size: 24px;
-    font-weight: bold;
-    color: #0f172a;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-    border-radius: 12px;
+    grid-template-columns: 280px 1fr;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    height: 550px;
     overflow: hidden;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    margin-top: 20px;
   }
-
-  th, td {
-    padding: 14px 18px;
-    text-align: left;
-    border-bottom: 1px solid #e2e8f0;
-    font-size: 14px;
+  .chat-sidebar {
+    border-right: 1px solid var(--border);
+    padding: 15px;
+    background: var(--bg);
   }
-
-  th {
-    background-color: #f8fafc;
-    color: #475569;
-    font-weight: 600;
-  }
-
-  input, select, textarea {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid #cbd5e1;
+  .chat-sidebar h4 { margin-bottom: 15px; font-size: 14px; color: var(--text-muted); }
+  .chat-user-item {
+    padding: 10px;
+    background: var(--surface);
     border-radius: 8px;
-    margin-top: 6px;
-    margin-bottom: 16px;
-    outline: none;
-  }
-
-  button.btn {
-    background: #2563eb;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
+    margin-bottom: 8px;
     cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    border: 1px solid var(--border);
   }
-
-  button.btn:hover {
-    background: #1d4ed8;
+  .chat-user-item:hover, .chat-user-item.active {
+    border-color: var(--primary);
+    background: #eff6ff;
+    color: var(--primary);
+  }
+  .chat-main { display: flex; flex-direction: column; height: 100%; }
+  .chat-header {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+  }
+  .chat-box {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .chat-input-area {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+  }
+  .order-status-select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 12px;
   }
 </style>
 
-
-</head>
-
-<body>
-
-<div id="toastContainer"></div>
-
-<header class="admin-header">
-
-<div class="admin-logo">
-
-<h2>
-
-Admin Dashboard
-
-</h2>
-
-</div>
-
-<div class="admin-header-right">
-
-<button id="adminNotification">
-
-Notifications
-
-</button>
-
-<button id="adminLogout">
-
-Logout
-
-</button>
-
-</div>
-
-</header>
-
-<div class="admin-layout">
-
-<aside class="admin-sidebar">
-
-<button class="admin-menu active" data-tab="dashboard">
-
-Dashboard
-
-</button>
-
-<button class="admin-menu" data-tab="products">
-
-Products
-
-</button>
-
-<button class="admin-menu" data-tab="categories">
-
-Categories
-
-</button>
-
-<button class="admin-menu" data-tab="orders">
-
-Orders
-
-</button>
-
-<button class="admin-menu" data-tab="customers">
-
-Customers
-
-</button>
-
-<button class="admin-menu" data-tab="banners">
-
-Banners
-
-</button>
-
-<button class="admin-menu" data-tab="coupons">
-
-Coupons
-
-</button>
-
-<button class="admin-menu" data-tab="chat">
-
-Live Chat
-
-</button>
-
-<button class="admin-menu" data-tab="notifications">
-
-Notifications
-
-</button>
-
-</aside>
-
-<main class="admin-content">
-
-<section id="dashboardTab" class="admin-page">
-
-<div class="dashboard-grid">
-
-<div class="dashboard-card">
-
-<h4>
-
-Revenue
-
-</h4>
-
-<h2 id="totalRevenue">
-
-৳0
-
-</h2>
-
-</div>
-
-<div class="dashboard-card">
-
-<h4>
-
-Orders
-
-</h4>
-
-<h2 id="totalOrders">
-
-0
-
-</h2>
-
-</div>
-
-<div class="dashboard-card">
-
-<h4>
-
-Products
-
-</h4>
-
-<h2 id="totalProducts">
-
-0
-
-</h2>
-
-</div>
-
-<div class="dashboard-card">
-
-<h4>
-
-Customers
-
-</h4>
-
-<h2 id="totalCustomers">
-
-0
-
-</h2>
-
-</div>
-
-<div class="dashboard-card">
-
-<h4>
-
-Low Stock
-
-</h4>
-
-<h2 id="lowStock">
-
-0
-
-</h2>
-
-</div>
-
-<div class="dashboard-card">
-
-<h4>
-
-Out Of Stock
-
-</h4>
-
-<h2 id="outOfStock">
-
-0
-
-</h2>
-
-</div>
-
-</div>
-
-</section>
-
-<section id="productsTab" class="admin-page hidden">
-
-<div class="admin-toolbar">
-
-<h3>
-
-Product Management
-
-</h3>
-
-<div>
-
-<input
-id="productId"
-type="hidden">
-
-<input
-id="productImages"
-type="file"
-accept="image/*"
-multiple>
-
-<input
-id="productName"
-type="text"
-placeholder="Product Name">
-
-<input
-id="productBrand"
-type="text"
-placeholder="Brand">
-
-<input
-id="productCategory"
-type="text"
-placeholder="Category">
-
-<input
-id="productSku"
-type="text"
-placeholder="SKU">
-
-<input
-id="productPrice"
-type="number"
-placeholder="Price">
-
-<input
-id="productSalePrice"
-type="number"
-placeholder="Sale Price">
-
-<input
-id="productStock"
-type="number"
-placeholder="Stock">
-
-<input
-id="productBadge"
-type="text"
-placeholder="Badge">
-
-<textarea
-id="productDescription"
-placeholder="Description"></textarea>
-
-<button onclick="addProduct()">
-
-Add Product
-
-</button>
-
-<button onclick="updateProduct()">
-
-Update Product
-
-</button>
-
-<button onclick="exportProducts()">
-
-Export CSV
-
-</button>
-
-<label class="admin-upload">
-
-Import CSV
-
-<input id="productImport" type="file" accept=".csv" onchange="importProducts(this.files[0])" hidden>
-
-</label>
-
-</div>
-
-</div>
-
-<div class="table-wrapper">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Image
-
-</th>
-
-<th>
-
-Name
-
-</th>
-
-<th>
-
-Brand
-
-</th>
-
-<th>
-
-Stock
-
-</th>
-
-<th>
-
-Price
-
-</th>
-
-<th>
-
-Action
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody id="productTable">
-
-</tbody>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="categoriesTab" class="admin-page hidden">
-
-<div class="admin-toolbar">
-
-<h3>
-
-Category Management
-
-</h3>
-
-<div>
-
-<input
-id="categoryId"
-type="hidden">
-
-<input
-id="categoryImage"
-type="file"
-accept="image/*">
-
-<input
-id="categoryName"
-type="text"
-placeholder="Category Name">
-
-<button onclick="addCategory()">
-
-Add
-
-</button>
-
-<button onclick="updateCategory()">
-
-Update
-
-</button>
-
-</div>
-
-</div>
-
-<div class="table-wrapper">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Image
-
-</th>
-
-<th>
-
-Category
-
-</th>
-
-<th>
-
-Sub Category
-
-</th>
-
-<th>
-
-Action
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody id="categoryTable">
-
-</tbody>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="ordersTab" class="admin-page hidden">
-
-<h3>
-
-Order Management
-
-</h3>
-
-<div class="table-wrapper">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>Order</th>
-
-<th>Customer</th>
-
-<th>Payment</th>
-
-<th>Payment Status</th>
-
-<th>Delivery</th>
-
-<th>Status</th>
-
-<th>Total</th>
-
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-<tbody id="orderTable"></tbody>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="customersTab" class="admin-page hidden">
-
-<h3>
-
-Customer Management
-
-</h3>
-
-<div class="table-wrapper">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>Photo</th>
-
-<th>Name</th>
-
-<th>Phone</th>
-
-<th>Email</th>
-
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-<tbody id="customerTable"></tbody>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="bannersTab" class="admin-page hidden">
-
-<div class="admin-toolbar">
-
-<h3>
-
-Banner Management
-
-</h3>
-
-<div>
-
-<input
-id="bannerId"
-type="hidden">
-
-<input
-id="bannerImage"
-type="file"
-accept="image/*">
-
-<input
-id="bannerTitle"
-type="text"
-placeholder="Banner Title">
-
-<input
-id="bannerSubtitle"
-type="text"
-placeholder="Banner Subtitle">
-
-<input
-id="bannerLink"
-type="text"
-placeholder="Banner Link">
-
-<input
-id="bannerPriority"
-type="number"
-placeholder="Priority">
-
-<button onclick="addBanner()">
-
-Add
-
-</button>
-
-<button onclick="updateBanner()">
-
-Update
-
-</button>
-
-</div>
-
-</div>
-
-<div class="table-wrapper">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>Image</th>
-
-<th>Title</th>
-
-<th>Priority</th>
-
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-<tbody id="bannerTable"></tbody>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="couponsTab" class="admin-page hidden">
-
-<div class="admin-toolbar">
-
-<h3>
-
-Coupon Management
-
-</h3>
-
-<div>
-
-<input
-id="couponId"
-type="hidden">
-
-<input
-id="couponCode"
-type="text"
-placeholder="Coupon Code">
-
-<input
-id="couponAmount"
-type="number"
-placeholder="Amount">
-
-<input
-id="couponExpiry"
-type="date">
-
-<button onclick="addCoupon()">
-
-Add
-
-</button>
-
-<button onclick="updateCoupon()">
-
-Update
-
-</button>
-
-</div>
-
-</div>
-
-<div class="table-wrapper">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>Code</th>
-
-<th>Amount</th>
-
-<th>Expiry</th>
-
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-<tbody id="couponTable"></tbody>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="chatTab" class="admin-page hidden">
-
-<h3>
-
-Live Chat
-
-</h3>
-
-<div class="table-wrapper">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>User</th>
-
-<th>Last Message</th>
-
-<th>Status</th>
-
-<th>Typing</th>
-
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-<tbody id="chatTable">
-
-</tbody>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="notificationsTab" class="admin-page hidden">
-
-<h3>
-
-Send Notification
-
-</h3>
-
-<div class="admin-form">
-
-<input
-id="notificationTitle"
-type="text"
-placeholder="Notification Title">
-
-<textarea
-id="notificationMessage"
-placeholder="Notification Message">
-
-</textarea>
-
-<button
-onclick="sendPromotionNotification()">
-
-Send Notification
-
-</button>
-
-</div>
-
-</section>
-
-</main>
-
-</div>
-
-<div id="orderViewer" class="modal">
-
-<div class="modal-content">
-
-<button
-class="modal-close"
-onclick="document.getElementById('orderViewer').classList.remove('active')">
-
-✕
-
-</button>
-
-<h2>
-
-Order Details
-
-</h2>
-
-<p>
-
-Order :
-<strong id="viewerNumber"></strong>
-
-</p>
-
-<p>
-
-Customer :
-<strong id="viewerCustomer"></strong>
-
-</p>
-
-<p>
-
-Phone :
-<strong id="viewerPhone"></strong>
-
-</p>
-
-<p>
-
-Address :
-<strong id="viewerAddress"></strong>
-
-</p>
-
-<p>
-
-Payment :
-<strong id="viewerPayment"></strong>
-
-</p>
-
-<div id="viewerItems">
-
-</div>
-
-<label>
-
-Order Status
-
-</label>
-
-<select id="viewerStatus">
-
-<option>Pending</option>
-
-<option>Confirmed</option>
-
-<option>Processing</option>
-
-<option>Shipped</option>
-
-<option>Delivered</option>
-
-<option>Cancelled</option>
-
-</select>
-
-<label>
-
-Delivery Status
-
-</label>
-
-<select id="viewerDelivery">
-
-<option>Pending</option>
-
-<option>On The Way</option>
-
-<option>Delivered</option>
-
-</select>
-
-<label>
-
-Payment Status
-
-</label>
-
-<select id="viewerPaymentStatus">
-
-<option>Pending</option>
-
-<option>Paid</option>
-
-<option>Failed</option>
-
-</select>
-
-<button
-onclick="saveOrderStatus()">
-
-Save
-
-</button>
-
-</div>
-
-</div>
-
-<div id="customerModal" class="modal">
-
-<div class="modal-content">
-
-<button
-class="modal-close"
-onclick="document.getElementById('customerModal').classList.remove('active')">
-
-✕
-
-</button>
-
-<img
-id="customerImage"
-class="customer-avatar"
-src=""
-alt="Customer">
-
-<h2 id="customerName"></h2>
-
-<p id="customerEmail"></p>
-
-<p id="customerPhone"></p>
-
-<p id="customerAddress"></p>
-
-<h3>
-
-Order History
-
-</h3>
-
-<div id="customerOrders"></div>
-
-</div>
-
-</div>
-
-<div id="chatModal" class="modal">
-
-<div class="modal-content admin-chat-window">
-
-<button
-class="modal-close"
-onclick="document.getElementById('chatModal').classList.remove('active')">
-
-✕
-
-</button>
-
-<h3>
-
-Chat With
-
-<span id="adminChatUser"></span>
-
-</h3>
-
-<div
-id="adminChatMessages"
-class="admin-chat-messages">
-
-</div>
-
-<div class="admin-chat-input">
-
-<input
-id="adminMessage"
-type="text"
-placeholder="Type message...">
-
-<button id="adminSend">
-
-Send
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<script>
-
-document.querySelectorAll(".admin-menu").forEach(button=>{
-
-button.onclick=()=>{
-
-document.querySelectorAll(".admin-menu").forEach(item=>{
-
-item.classList.remove("active");
-
-});
-
-button.classList.add("active");
-
-document.querySelectorAll(".admin-page").forEach(page=>{
-
-page.classList.add("hidden");
-
-});
-
-document.getElementById(
-
-button.dataset.tab+"Tab"
-
-).classList.remove("hidden");
-
-};
-
-});
-
-</script>
-
-<script type="module" src="admin.js"></script>
-
+    <div id="part2-container"></div>
+
+  </main>
+
+  <script>
+    function openTab(tabId, el) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      
+      const target = document.getElementById(tabId);
+      if(target) target.classList.add('active');
+      el.classList.add('active');
+      document.getElementById('pageTitle').innerText = el.innerText.split('\n')[0];
+    }
+  </script>
 </body>
-
 </html>
