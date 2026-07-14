@@ -1,13 +1,11 @@
 import {
   auth,
   db,
-  storage,
   collections,
   onAuthStateChanged,
   collection,
   doc,
   addDoc,
-  setDoc,
   updateDoc,
   deleteDoc,
   getDoc,
@@ -16,10 +14,7 @@ import {
   orderBy,
   where,
   onSnapshot,
-  serverTimestamp,
-  uploadProductImages,
-  uploadCategoryImage,
-  uploadBannerImage
+  serverTimestamp
 } from "./firebase.js";
 
 const $ = selector => document.querySelector(selector);
@@ -37,7 +32,7 @@ const state = {
 };
 
 function currency(value) {
-  return new Intl.NumberFormat("en-BD").format(value);
+  return new Intl.NumberFormat("en-BD").format(value || 0);
 }
 
 function toast(message) {
@@ -47,9 +42,7 @@ function toast(message) {
   div.className = "toast success";
   div.textContent = message;
   container.appendChild(div);
-  setTimeout(() => {
-    div.remove();
-  }, 3000);
+  setTimeout(() => div.remove(), 3000);
 }
 
 function loadDashboard() {
@@ -68,10 +61,7 @@ function watchProducts() {
     snapshot => {
       state.products = [];
       snapshot.forEach(item => {
-        state.products.push({
-          id: item.id,
-          ...item.data()
-        });
+        state.products.push({ id: item.id, ...item.data() });
       });
       renderProducts();
       dashboardSummary();
@@ -79,20 +69,16 @@ function watchProducts() {
   );
 }
 
-// ক্যাটাগরি রিয়েলটাইম ওয়াচ এবং ড্রপডাউন আপডেট
 function watchCategories() {
   onSnapshot(
     query(collection(db, collections.categories), orderBy("name")),
     snapshot => {
       state.categories = [];
       snapshot.forEach(item => {
-        state.categories.push({
-          id: item.id,
-          ...item.data()
-        });
+        state.categories.push({ id: item.id, ...item.data() });
       });
       renderCategories();
-      populateCategoryDropdown(); // 👈 ক্যাটাগরি ড্রপডাউনে লোড করার ফাংশন
+      populateCategoryDropdown(); // 👈 অটোমেটিক ড্রপডাউন লোড
       dashboardSummary();
     }
   );
@@ -115,10 +101,7 @@ function watchOrders() {
     snapshot => {
       state.orders = [];
       snapshot.forEach(item => {
-        state.orders.push({
-          id: item.id,
-          ...item.data()
-        });
+        state.orders.push({ id: item.id, ...item.data() });
       });
       renderOrders();
       dashboardSummary();
@@ -132,10 +115,7 @@ function watchUsers() {
     snapshot => {
       state.customers = [];
       snapshot.forEach(item => {
-        state.customers.push({
-          id: item.id,
-          ...item.data()
-        });
+        state.customers.push({ id: item.id, ...item.data() });
       });
       renderCustomers();
       dashboardSummary();
@@ -149,10 +129,7 @@ function watchCoupons() {
     snapshot => {
       state.coupons = [];
       snapshot.forEach(item => {
-        state.coupons.push({
-          id: item.id,
-          ...item.data()
-        });
+        state.coupons.push({ id: item.id, ...item.data() });
       });
       renderCoupons();
     }
@@ -165,10 +142,7 @@ function watchBanners() {
     snapshot => {
       state.banners = [];
       snapshot.forEach(item => {
-        state.banners.push({
-          id: item.id,
-          ...item.data()
-        });
+        state.banners.push({ id: item.id, ...item.data() });
       });
       renderBanners();
     }
@@ -181,10 +155,7 @@ function watchChats() {
     snapshot => {
       state.chats = [];
       snapshot.forEach(item => {
-        state.chats.push({
-          id: item.id,
-          ...item.data()
-        });
+        state.chats.push({ id: item.id, ...item.data() });
       });
       renderChats();
     }
@@ -206,7 +177,7 @@ function renderProducts() {
   if (!table) return;
   table.innerHTML = "";
   state.products.forEach(product => {
-    const img = product.images && product.images.length > 0 ? product.images[0] : '';
+    const img = (product.images && product.images.length > 0) ? product.images[0] : '';
     table.innerHTML += `
       <tr>
         <td><img src="${img}" width="55"></td>
@@ -230,8 +201,8 @@ function renderCategories() {
   state.categories.forEach(category => {
     table.innerHTML += `
       <tr>
-        <td><img src="${category.image}" width="45"></td>
-        <td>${category.name}</td>
+        <td><img src="${category.image || ''}" width="45"></td>
+        <td>${category.name || ''}</td>
         <td>${category.subCategoryCount || 0}</td>
         <td>
           <button onclick="editCategory('${category.id}')">Edit</button>
@@ -249,12 +220,12 @@ function renderOrders() {
   state.orders.forEach(order => {
     table.innerHTML += `
       <tr>
-        <td>${order.orderNumber}</td>
-        <td>${order.customerName}</td>
-        <td>${order.paymentMethod}</td>
-        <td>${order.paymentStatus}</td>
-        <td>${order.deliveryStatus}</td>
-        <td>${order.status}</td>
+        <td>${order.orderNumber || ''}</td>
+        <td>${order.customerName || ''}</td>
+        <td>${order.paymentMethod || ''}</td>
+        <td>${order.paymentStatus || ''}</td>
+        <td>${order.deliveryStatus || ''}</td>
+        <td>${order.status || ''}</td>
         <td>৳${currency(order.total)}</td>
         <td><button onclick="viewOrder('${order.id}')">View</button></td>
       </tr>
@@ -269,10 +240,10 @@ function renderCustomers() {
   state.customers.forEach(user => {
     table.innerHTML += `
       <tr>
-        <td><img src="${user.photo}" width="45"></td>
-        <td>${user.name}</td>
-        <td>${user.phone}</td>
-        <td>${user.email}</td>
+        <td><img src="${user.photo || ''}" width="45"></td>
+        <td>${user.name || ''}</td>
+        <td>${user.phone || ''}</td>
+        <td>${user.email || ''}</td>
         <td><button onclick="viewCustomer('${user.id}')">Details</button></td>
       </tr>
     `;
@@ -286,9 +257,9 @@ function renderCoupons() {
   state.coupons.forEach(coupon => {
     table.innerHTML += `
       <tr>
-        <td>${coupon.code}</td>
-        <td>${coupon.amount}</td>
-        <td>${coupon.expiryDate}</td>
+        <td>${coupon.code || ''}</td>
+        <td>${coupon.amount || 0}</td>
+        <td>${coupon.expiryDate || ''}</td>
         <td>
           <button onclick="editCoupon('${coupon.id}')">Edit</button>
           <button onclick="deleteCoupon('${coupon.id}')">Delete</button>
@@ -305,9 +276,9 @@ function renderBanners() {
   state.banners.forEach(banner => {
     table.innerHTML += `
       <tr>
-        <td><img src="${banner.image}" width="90"></td>
-        <td>${banner.title}</td>
-        <td>${banner.priority}</td>
+        <td><img src="${banner.image || ''}" width="90"></td>
+        <td>${banner.title || ''}</td>
+        <td>${banner.priority || 0}</td>
         <td>
           <button onclick="editBanner('${banner.id}')">Edit</button>
           <button onclick="deleteBanner('${banner.id}')">Delete</button>
@@ -324,7 +295,7 @@ function renderChats() {
   state.chats.forEach(chat => {
     table.innerHTML += `
       <tr>
-        <td>${chat.uid}</td>
+        <td>${chat.uid || ''}</td>
         <td>${chat.lastMessage || ""}</td>
         <td>${chat.online ? "Online" : "Offline"}</td>
         <td>${chat.typing ? "Typing" : "Idle"}</td>
@@ -334,26 +305,27 @@ function renderChats() {
   });
 }
 
+// 🟢 প্রোডাক্ট যোগ (ইমেজ লিংক দিয়ে)
 window.addProduct = async () => {
-  const files = [...$("#productImages").files];
-  const images = await uploadProductImages(files);
+  const imageUrlInput = $("#productImages") ? $("#productImages").value.trim() : "";
+  const images = imageUrlInput ? [imageUrlInput] : [];
+
   await addDoc(collection(db, collections.products), {
     name: $("#productName").value.trim(),
-    description: $("#productDescription").value.trim(),
-    brand: $("#productBrand").value.trim(),
+    description: $("#productDescription") ? $("#productDescription").value.trim() : "",
+    brand: $("#productBrand") ? $("#productBrand").value.trim() : "",
     categoryId: $("#productCategory").value,
-    sku: $("#productSku").value.trim(),
-    price: Number($("#productPrice").value),
-    salePrice: Number($("#productSalePrice").value),
-    stock: Number($("#productStock").value),
+    sku: $("#productSku") ? $("#productSku").value.trim() : "",
+    price: Number($("#productPrice").value || 0),
+    salePrice: Number($("#productSalePrice") ? $("#productSalePrice").value : $("#productPrice").value),
+    stock: Number($("#productStock") ? $("#productStock").value : 0),
     rating: 0,
     reviewCount: 0,
     sales: 0,
     views: 0,
     status: "active",
     badge: $("#productBadge") ? $("#productBadge").value.trim() : "",
-    specifications: {},
-    images,
+    images: images,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   });
@@ -365,28 +337,33 @@ window.editProduct = async id => {
   if (!snapshot.exists()) return;
   const data = snapshot.data();
   if ($("#productId")) $("#productId").value = id;
-  $("#productName").value = data.name;
-  $("#productDescription").value = data.description;
-  $("#productBrand").value = data.brand;
-  $("#productCategory").value = data.categoryId;
-  $("#productSku").value = data.sku;
-  $("#productPrice").value = data.price;
-  $("#productSalePrice").value = data.salePrice;
-  $("#productStock").value = data.stock;
-  if ($("#productBadge")) $("#productBadge").value = data.badge;
+  $("#productName").value = data.name || "";
+  if ($("#productDescription")) $("#productDescription").value = data.description || "";
+  if ($("#productBrand")) $("#productBrand").value = data.brand || "";
+  $("#productCategory").value = data.categoryId || "";
+  if ($("#productSku")) $("#productSku").value = data.sku || "";
+  $("#productPrice").value = data.price || 0;
+  if ($("#productSalePrice")) $("#productSalePrice").value = data.salePrice || 0;
+  if ($("#productStock")) $("#productStock").value = data.stock || 0;
+  if ($("#productBadge")) $("#productBadge").value = data.badge || "";
+  if ($("#productImages")) $("#productImages").value = (data.images && data.images.length > 0) ? data.images[0] : "";
 };
 
 window.updateProduct = async () => {
+  const imageUrlInput = $("#productImages") ? $("#productImages").value.trim() : "";
+  const images = imageUrlInput ? [imageUrlInput] : [];
+
   await updateDoc(doc(db, collections.products, $("#productId").value), {
     name: $("#productName").value,
-    description: $("#productDescription").value,
-    brand: $("#productBrand").value,
+    description: $("#productDescription") ? $("#productDescription").value : "",
+    brand: $("#productBrand") ? $("#productBrand").value : "",
     categoryId: $("#productCategory").value,
-    sku: $("#productSku").value,
+    sku: $("#productSku") ? $("#productSku").value : "",
     price: Number($("#productPrice").value),
-    salePrice: Number($("#productSalePrice").value),
-    stock: Number($("#productStock").value),
+    salePrice: Number($("#productSalePrice") ? $("#productSalePrice").value : $("#productPrice").value),
+    stock: Number($("#productStock") ? $("#productStock").value : 0),
     badge: $("#productBadge") ? $("#productBadge").value : "",
+    images: images,
     updatedAt: serverTimestamp()
   });
   toast("Product Updated");
@@ -398,12 +375,12 @@ window.deleteProduct = async id => {
   toast("Product Deleted");
 };
 
+// 🟢 ক্যাটাগরি যোগ (ইমেজ লিংক দিয়ে)
 window.addCategory = async () => {
-  const file = $("#categoryImage").files[0];
-  const image = await uploadCategoryImage(file);
+  const image = $("#categoryImage") ? $("#categoryImage").value.trim() : "";
   await addDoc(collection(db, collections.categories), {
     name: $("#categoryName").value.trim(),
-    image,
+    image: image,
     subCategoryCount: 0,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp()
@@ -415,13 +392,15 @@ window.editCategory = async id => {
   const snapshot = await getDoc(doc(db, collections.categories, id));
   if (!snapshot.exists()) return;
   const data = snapshot.data();
-  $("#categoryId").value = id;
-  $("#categoryName").value = data.name;
+  if ($("#categoryId")) $("#categoryId").value = id;
+  $("#categoryName").value = data.name || "";
+  if ($("#categoryImage")) $("#categoryImage").value = data.image || "";
 };
 
 window.updateCategory = async () => {
   await updateDoc(doc(db, collections.categories, $("#categoryId").value), {
     name: $("#categoryName").value,
+    image: $("#categoryImage") ? $("#categoryImage").value.trim() : "",
     updatedAt: serverTimestamp()
   });
   toast("Category Updated");
@@ -433,15 +412,15 @@ window.deleteCategory = async id => {
   toast("Category Deleted");
 };
 
+// 🟢 ব্যানার যোগ (ইমেজ লিংক দিয়ে)
 window.addBanner = async () => {
-  const file = $("#bannerImage").files[0];
-  const image = await uploadBannerImage(file);
+  const image = $("#bannerImage") ? $("#bannerImage").value.trim() : "";
   await addDoc(collection(db, collections.banners), {
-    title: $("#bannerTitle").value,
-    subtitle: $("#bannerSubtitle").value,
-    link: $("#bannerLink").value,
-    priority: Number($("#bannerPriority").value),
-    image,
+    title: $("#bannerTitle") ? $("#bannerTitle").value : "",
+    subtitle: $("#bannerSubtitle") ? $("#bannerSubtitle").value : "",
+    link: $("#bannerLink") ? $("#bannerLink").value : "",
+    priority: Number($("#bannerPriority") ? $("#bannerPriority").value : 1),
+    image: image,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   });
@@ -452,19 +431,21 @@ window.editBanner = async id => {
   const snapshot = await getDoc(doc(db, collections.banners, id));
   if (!snapshot.exists()) return;
   const data = snapshot.data();
-  $("#bannerId").value = id;
-  $("#bannerTitle").value = data.title;
-  $("#bannerSubtitle").value = data.subtitle;
-  $("#bannerLink").value = data.link;
-  $("#bannerPriority").value = data.priority;
+  if ($("#bannerId")) $("#bannerId").value = id;
+  if ($("#bannerTitle")) $("#bannerTitle").value = data.title || "";
+  if ($("#bannerSubtitle")) $("#bannerSubtitle").value = data.subtitle || "";
+  if ($("#bannerLink")) $("#bannerLink").value = data.link || "";
+  if ($("#bannerPriority")) $("#bannerPriority").value = data.priority || 1;
+  if ($("#bannerImage")) $("#bannerImage").value = data.image || "";
 };
 
 window.updateBanner = async () => {
   await updateDoc(doc(db, collections.banners, $("#bannerId").value), {
-    title: $("#bannerTitle").value,
-    subtitle: $("#bannerSubtitle").value,
-    link: $("#bannerLink").value,
-    priority: Number($("#bannerPriority").value),
+    title: $("#bannerTitle") ? $("#bannerTitle").value : "",
+    subtitle: $("#bannerSubtitle") ? $("#bannerSubtitle").value : "",
+    link: $("#bannerLink") ? $("#bannerLink").value : "",
+    priority: Number($("#bannerPriority") ? $("#bannerPriority").value : 1),
+    image: $("#bannerImage") ? $("#bannerImage").value.trim() : "",
     updatedAt: serverTimestamp()
   });
   toast("Banner Updated");
@@ -492,10 +473,10 @@ window.editCoupon = async id => {
   const snapshot = await getDoc(doc(db, collections.coupons, id));
   if (!snapshot.exists()) return;
   const data = snapshot.data();
-  $("#couponId").value = id;
-  $("#couponCode").value = data.code;
-  $("#couponAmount").value = data.amount;
-  $("#couponExpiry").value = data.expiryDate;
+  if ($("#couponId")) $("#couponId").value = id;
+  $("#couponCode").value = data.code || "";
+  $("#couponAmount").value = data.amount || 0;
+  $("#couponExpiry").value = data.expiryDate || "";
 };
 
 window.updateCoupon = async () => {
@@ -519,29 +500,31 @@ window.viewOrder = async id => {
   const snapshot = await getDoc(doc(db, collections.orders, id));
   if (!snapshot.exists()) return;
   const order = snapshot.data();
-  $("#orderViewer").classList.add("active");
-  $("#viewerNumber").textContent = order.orderNumber;
-  $("#viewerCustomer").textContent = order.customerName;
-  $("#viewerPhone").textContent = order.phone;
-  $("#viewerAddress").textContent = `${order.area}, ${order.upazila}, ${order.district}, ${order.division}`;
-  $("#viewerPayment").textContent = order.paymentMethod;
-  $("#viewerStatus").value = order.status;
-  $("#viewerDelivery").value = order.deliveryStatus;
-  $("#viewerPaymentStatus").value = order.paymentStatus;
+  if ($("#orderViewer")) $("#orderViewer").classList.add("active");
+  if ($("#viewerNumber")) $("#viewerNumber").textContent = order.orderNumber || "";
+  if ($("#viewerCustomer")) $("#viewerCustomer").textContent = order.customerName || "";
+  if ($("#viewerPhone")) $("#viewerPhone").textContent = order.phone || "";
+  if ($("#viewerAddress")) $("#viewerAddress").textContent = `${order.area || ''}, ${order.upazila || ''}, ${order.district || ''}, ${order.division || ''}`;
+  if ($("#viewerPayment")) $("#viewerPayment").textContent = order.paymentMethod || "";
+  if ($("#viewerStatus")) $("#viewerStatus").value = order.status || "";
+  if ($("#viewerDelivery")) $("#viewerDelivery").value = order.deliveryStatus || "";
+  if ($("#viewerPaymentStatus")) $("#viewerPaymentStatus").value = order.paymentStatus || "";
 
   const items = $("#viewerItems");
-  items.innerHTML = "";
-  order.items.forEach(item => {
-    items.innerHTML += `
-      <div class="viewer-item">
-        <img src="${item.image}" width="60">
-        <div>
-          <strong>${item.name}</strong>
-          <p>${item.quantity} × ৳${currency(item.price)}</p>
+  if (items) {
+    items.innerHTML = "";
+    (order.items || []).forEach(item => {
+      items.innerHTML += `
+        <div class="viewer-item">
+          <img src="${item.image}" width="60">
+          <div>
+            <strong>${item.name}</strong>
+            <p>${item.quantity} × ৳${currency(item.price)}</p>
+          </div>
         </div>
-      </div>
-    `;
-  });
+      `;
+    });
+  }
 };
 
 window.saveOrderStatus = async () => {
@@ -559,37 +542,40 @@ window.viewCustomer = async id => {
   const snapshot = await getDoc(doc(db, collections.users, id));
   if (!snapshot.exists()) return;
   const data = snapshot.data();
-  $("#customerModal").classList.add("active");
-  $("#customerImage").src = data.photo;
-  $("#customerName").textContent = data.name;
-  $("#customerEmail").textContent = data.email;
-  $("#customerPhone").textContent = data.phone;
-  $("#customerAddress").textContent = `${data.area}, ${data.upazila}, ${data.district}, ${data.division}`;
+  if ($("#customerModal")) $("#customerModal").classList.add("active");
+  if ($("#customerImage")) $("#customerImage").src = data.photo || "";
+  if ($("#customerName")) $("#customerName").textContent = data.name || "";
+  if ($("#customerEmail")) $("#customerEmail").textContent = data.email || "";
+  if ($("#customerPhone")) $("#customerPhone").textContent = data.phone || "";
+  if ($("#customerAddress")) $("#customerAddress").textContent = `${data.area || ''}, ${data.upazila || ''}, ${data.district || ''}, ${data.division || ''}`;
 
   const ordersQuery = query(collection(db, collections.orders), where("uid", "==", id));
   const orderSnapshot = await getDocs(ordersQuery);
   const history = $("#customerOrders");
-  history.innerHTML = "";
-  orderSnapshot.forEach(order => {
-    const item = order.data();
-    history.innerHTML += `
-      <div class="history-card">
-        <strong>${item.orderNumber}</strong>
-        <span>৳${currency(item.total)}</span>
-        <small>${item.status}</small>
-      </div>
-    `;
-  });
+  if (history) {
+    history.innerHTML = "";
+    orderSnapshot.forEach(order => {
+      const item = order.data();
+      history.innerHTML += `
+        <div class="history-card">
+          <strong>${item.orderNumber}</strong>
+          <span>৳${currency(item.total)}</span>
+          <small>${item.status}</small>
+        </div>
+      `;
+    });
+  }
 };
 
 window.openChat = async chatId => {
-  $("#chatModal").classList.add("active");
-  $("#adminChatUser").textContent = chatId;
+  if ($("#chatModal")) $("#chatModal").classList.add("active");
+  if ($("#adminChatUser")) $("#adminChatUser").textContent = chatId;
   const container = $("#adminChatMessages");
 
   onSnapshot(
     query(collection(db, collections.chats, chatId, collections.messages), orderBy("createdAt", "asc")),
     snapshot => {
+      if (!container) return;
       container.innerHTML = "";
       snapshot.forEach(message => {
         const data = message.data();
@@ -603,25 +589,27 @@ window.openChat = async chatId => {
     }
   );
 
-  $("#adminSend").onclick = async () => {
-    const text = $("#adminMessage").value.trim();
-    if (!text) return;
+  if ($("#adminSend")) {
+    $("#adminSend").onclick = async () => {
+      const text = $("#adminMessage").value.trim();
+      if (!text) return;
 
-    await addDoc(collection(db, collections.chats, chatId, collections.messages), {
-      sender: "admin",
-      type: "text",
-      text,
-      read: true,
-      createdAt: serverTimestamp()
-    });
+      await addDoc(collection(db, collections.chats, chatId, collections.messages), {
+        sender: "admin",
+        type: "text",
+        text,
+        read: true,
+        createdAt: serverTimestamp()
+      });
 
-    await updateDoc(doc(db, collections.chats, chatId), {
-      lastMessage: text,
-      updatedAt: serverTimestamp()
-    });
+      await updateDoc(doc(db, collections.chats, chatId), {
+        lastMessage: text,
+        updatedAt: serverTimestamp()
+      });
 
-    $("#adminMessage").value = "";
-  };
+      $("#adminMessage").value = "";
+    };
+  }
 };
 
 window.sendPromotionNotification = async () => {
@@ -653,44 +641,12 @@ window.sendPromotionNotification = async () => {
   toast("Notification Sent");
 };
 
-window.exportProducts = () => {
-  const rows = [["Name", "Brand", "Price", "Sale Price", "Stock"]];
-  state.products.forEach(item => {
-    rows.push([item.name, item.brand, item.price, item.salePrice, item.stock]);
-  });
-  const csv = rows.map(r => r.join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "products.csv";
-  link.click();
-  URL.revokeObjectURL(url);
-};
-
-window.importProducts = file => {
-  const reader = new FileReader();
-  reader.onload = e => {
-    console.log(e.target.result);
-    toast("CSV Loaded");
-  };
-  reader.readAsText(file);
-};
-
 onAuthStateChanged(auth, user => {
   if (!user) {
     location.href = "login.html";
     return;
   }
   loadDashboard();
-});
-
-window.addEventListener("load", () => {
-  $("#productImport")?.addEventListener("change", e => {
-    if (e.target.files.length) {
-      importProducts(e.target.files[0]);
-    }
-  });
 });
 
 console.log(
