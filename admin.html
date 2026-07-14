@@ -1,376 +1,1017 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Admin Dashboard</title>
+
+<link rel="stylesheet" href="style.css">
+
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex">
 
-  <!-- Sidebar -->
-  <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col fixed inset-y-0 z-50 shadow-xl">
-    <div class="h-16 flex items-center px-6 bg-slate-950 border-b border-slate-800">
-      <i class="fa-solid fa-gauge-high text-indigo-500 text-xl mr-3"></i>
-      <h2 class="text-lg font-bold text-white tracking-wide">Admin Panel</h2>
-    </div>
-    <nav class="sidebar-menu flex-1 overflow-y-auto py-4 px-3 space-y-1">
-      <a href="#dashboard" class="menu-item active flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium bg-indigo-600 text-white transition-colors">
-        <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
-      </a>
-      <a href="#products" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
-        <i class="fa-solid fa-box w-5 text-center"></i> Products
-      </a>
-      <a href="#categories" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
-        <i class="fa-solid fa-layer-group w-5 text-center"></i> Categories
-      </a>
-      <a href="#orders" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
-        <i class="fa-solid fa-cart-shopping w-5 text-center"></i> Orders
-      </a>
-      <a href="#customers" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
-        <i class="fa-solid fa-users w-5 text-center"></i> Customers
-      </a>
-      <a href="#banners" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
-        <i class="fa-solid fa-images w-5 text-center"></i> Banners
-      </a>
-      <a href="#coupons" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
-        <i class="fa-solid fa-ticket w-5 text-center"></i> Coupons
-      </a>
-      <a href="#chats" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
-        <i class="fa-solid fa-comments w-5 text-center"></i> Live Chat
-      </a>
-      <a href="#notifications" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
-        <i class="fa-solid fa-bell w-5 text-center"></i> Notifications
-      </a>
-    </nav>
-    <div class="p-4 border-t border-slate-800">
-      <button id="adminLogout" type="button" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
-      </button>
-    </div>
-  </aside>
+<body>
 
-  <!-- Main Content Area -->
-  <main class="ml-64 flex-1 p-8 overflow-y-auto">
+<div id="toastContainer"></div>
 
-    <!-- Dashboard Section -->
-    <section id="dashboard" class="admin-section space-y-6">
-      <div class="flex items-center justify-between border-b border-slate-200 pb-4">
-        <div>
-          <h1 class="text-2xl font-bold text-slate-900">Dashboard Overview</h1>
-          <p class="text-sm text-slate-500">Welcome back! Here is your store summary.</p>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div class="p-3 bg-indigo-50 text-indigo-600 rounded-lg"><i class="fa-solid fa-bangladeshi-taka-sign text-2xl"></i></div>
-          <div><p class="text-sm text-slate-500 font-medium">Total Revenue</p><h3 id="totalRevenue" class="text-2xl font-bold text-slate-900">৳0</h3></div>
-        </div>
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div class="p-3 bg-blue-50 text-blue-600 rounded-lg"><i class="fa-solid fa-bag-shopping text-2xl"></i></div>
-          <div><p class="text-sm text-slate-500 font-medium">Total Orders</p><h3 id="totalOrders" class="text-2xl font-bold text-slate-900">0</h3></div>
-        </div>
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg"><i class="fa-solid fa-boxes-stacked text-2xl"></i></div>
-          <div><p class="text-sm text-slate-500 font-medium">Total Products</p><h3 id="totalProducts" class="text-2xl font-bold text-slate-900">0</h3></div>
-        </div>
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div class="p-3 bg-purple-50 text-purple-600 rounded-lg"><i class="fa-solid fa-user-group text-2xl"></i></div>
-          <div><p class="text-sm text-slate-500 font-medium">Total Customers</p><h3 id="totalCustomers" class="text-2xl font-bold text-slate-900">0</h3></div>
-        </div>
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div class="p-3 bg-amber-50 text-amber-600 rounded-lg"><i class="fa-solid fa-triangle-exclamation text-2xl"></i></div>
-          <div><p class="text-sm text-slate-500 font-medium">Low Stock Items</p><h3 id="lowStock" class="text-2xl font-bold text-amber-600">0</h3></div>
-        </div>
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div class="p-3 bg-rose-50 text-rose-600 rounded-lg"><i class="fa-solid fa-circle-xmark text-2xl"></i></div>
-          <div><p class="text-sm text-slate-500 font-medium">Out of Stock</p><h3 id="outOfStock" class="text-2xl font-bold text-rose-600">0</h3></div>
-        </div>
-      </div>
-    </section>
+<header class="admin-header">
 
-    <!-- Products Section -->
-    <section id="products" class="admin-section hidden space-y-6">
-      <div class="flex items-center justify-between border-b border-slate-200 pb-4">
-        <h1 class="text-2xl font-bold text-slate-900">Product Management</h1>
-        <div class="flex gap-3">
-          <button type="button" onclick="exportProducts()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all shadow">Export CSV</button>
-        </div>
-      </div>
+<div class="admin-logo">
 
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-4">
-        <h3 class="text-lg font-bold text-slate-800">Add / Edit Product</h3>
-        <input type="hidden" id="productId">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <input type="text" id="productName" placeholder="Product Name" class="border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          <input type="text" id="productBrand" placeholder="Brand" class="border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          <input type="text" id="productCategory" placeholder="Category ID" class="border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          <input type="text" id="productSku" placeholder="SKU" class="border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          <input type="number" id="productPrice" placeholder="Regular Price" class="border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          <input type="number" id="productSalePrice" placeholder="Sale Price" class="border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          <input type="number" id="productStock" placeholder="Stock Quantity" class="border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          <input type="text" id="productBadge" placeholder="Badge (e.g. Hot, New)" class="border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-        </div>
-        <div class="grid grid-cols-1 gap-4">
-          <!-- Image Link Input (Multiple comma separated) -->
-          <input type="text" id="productImages" placeholder="Image URL (একাধিক লিংক দিতে কমা ',' ব্যবহার করুন)" class="border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          <textarea id="productDescription" placeholder="Product Description" rows="3" class="border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none w-full"></textarea>
-        </div>
-        <div class="flex gap-3">
-          <button type="button" onclick="addProduct()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-md transition-all">Add Product</button>
-          <button type="button" onclick="updateProduct()" class="bg-slate-600 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-all">Update Product</button>
-        </div>
-      </div>
+<h2>
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <table class="w-full text-left text-sm text-slate-600">
-          <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-            <tr>
-              <th class="p-4">Image</th>
-              <th class="p-4">Name</th>
-              <th class="p-4">Brand</th>
-              <th class="p-4">Stock</th>
-              <th class="p-4">Price</th>
-              <th class="p-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="productTable" class="divide-y divide-slate-100"></tbody>
-        </table>
-      </div>
-    </section>
+Admin Dashboard
 
-    <!-- Categories Section -->
-    <section id="categories" class="admin-section hidden space-y-6">
-      <h1 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-4">Category Management</h1>
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-4">
-        <h3 class="text-lg font-bold text-slate-800">Add / Edit Category</h3>
-        <input type="hidden" id="categoryId">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input type="text" id="categoryName" placeholder="Category Name" class="border border-slate-300 rounded-lg p-2.5 text-sm">
-          <input type="text" id="categoryImage" placeholder="Category Image URL (লিংক দিন)" class="border border-slate-300 rounded-lg p-2.5 text-sm">
-        </div>
-        <div class="flex gap-3">
-          <button type="button" onclick="addCategory()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium">Add Category</button>
-          <button type="button" onclick="updateCategory()" class="bg-slate-600 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium">Update Category</button>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <table class="w-full text-left text-sm text-slate-600">
-          <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-            <tr><th class="p-4">Image</th><th class="p-4">Name</th><th class="p-4">Subcategories</th><th class="p-4">Actions</th></tr>
-          </thead>
-          <tbody id="categoryTable" class="divide-y divide-slate-100"></tbody>
-        </table>
-      </div>
-    </section>
+</h2>
 
-    <!-- Orders Section -->
-    <section id="orders" class="admin-section hidden space-y-6">
-      <h1 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-4">Order Management</h1>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <table class="w-full text-left text-sm text-slate-600">
-          <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-            <tr>
-              <th class="p-4">Order #</th>
-              <th class="p-4">Customer</th>
-              <th class="p-4">Payment</th>
-              <th class="p-4">Payment Status</th>
-              <th class="p-4">Delivery Status</th>
-              <th class="p-4">Order Status</th>
-              <th class="p-4">Total</th>
-              <th class="p-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="orderTable" class="divide-y divide-slate-100"></tbody>
-        </table>
-      </div>
-    </section>
+</div>
 
-    <!-- Customers Section -->
-    <section id="customers" class="admin-section hidden space-y-6">
-      <h1 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-4">Customer Management</h1>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <table class="w-full text-left text-sm text-slate-600">
-          <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-            <tr><th class="p-4">Photo</th><th class="p-4">Name</th><th class="p-4">Phone</th><th class="p-4">Email</th><th class="p-4">Actions</th></tr>
-          </thead>
-          <tbody id="customerTable" class="divide-y divide-slate-100"></tbody>
-        </table>
-      </div>
-    </section>
+<div class="admin-header-right">
 
-    <!-- Banners Section -->
-    <section id="banners" class="admin-section hidden space-y-6">
-      <h1 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-4">Banner Management</h1>
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-4">
-        <input type="hidden" id="bannerId">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <input type="text" id="bannerTitle" placeholder="Title" class="border border-slate-300 rounded-lg p-2.5 text-sm">
-          <input type="text" id="bannerSubtitle" placeholder="Subtitle" class="border border-slate-300 rounded-lg p-2.5 text-sm">
-          <input type="text" id="bannerLink" placeholder="Link URL" class="border border-slate-300 rounded-lg p-2.5 text-sm">
-          <input type="number" id="bannerPriority" placeholder="Priority" class="border border-slate-300 rounded-lg p-2.5 text-sm">
-        </div>
-        <input type="text" id="bannerImage" placeholder="Banner Image URL (লিংক দিন)" class="border border-slate-300 rounded-lg p-2.5 text-sm w-full">
-        <div class="flex gap-3">
-          <button type="button" onclick="addBanner()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium">Add Banner</button>
-          <button type="button" onclick="updateBanner()" class="bg-slate-600 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium">Update Banner</button>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <table class="w-full text-left text-sm text-slate-600">
-          <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-            <tr><th class="p-4">Image</th><th class="p-4">Title</th><th class="p-4">Priority</th><th class="p-4">Actions</th></tr>
-          </thead>
-          <tbody id="bannerTable" class="divide-y divide-slate-100"></tbody>
-        </table>
-      </div>
-    </section>
+<button id="adminNotification">
 
-    <!-- Coupons Section -->
-    <section id="coupons" class="admin-section hidden space-y-6">
-      <h1 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-4">Coupon Management</h1>
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-4">
-        <input type="hidden" id="couponId">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input type="text" id="couponCode" placeholder="Coupon Code" class="border border-slate-300 rounded-lg p-2.5 text-sm uppercase">
-          <input type="number" id="couponAmount" placeholder="Discount Amount (৳)" class="border border-slate-300 rounded-lg p-2.5 text-sm">
-          <input type="date" id="couponExpiry" class="border border-slate-300 rounded-lg p-2.5 text-sm">
-        </div>
-        <div class="flex gap-3">
-          <button type="button" onclick="addCoupon()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium">Add Coupon</button>
-          <button type="button" onclick="updateCoupon()" class="bg-slate-600 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium">Update Coupon</button>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <table class="w-full text-left text-sm text-slate-600">
-          <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-            <tr><th class="p-4">Code</th><th class="p-4">Discount</th><th class="p-4">Expiry</th><th class="p-4">Actions</th></tr>
-          </thead>
-          <tbody id="couponTable" class="divide-y divide-slate-100"></tbody>
-        </table>
-      </div>
-    </section>
+Notifications
 
-    <!-- Chats Section -->
-    <section id="chats" class="admin-section hidden space-y-6">
-      <h1 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-4">Live Customer Support</h1>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <table class="w-full text-left text-sm text-slate-600">
-          <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-            <tr><th class="p-4">Customer ID</th><th class="p-4">Last Message</th><th class="p-4">Status</th><th class="p-4">Activity</th><th class="p-4">Actions</th></tr>
-          </thead>
-          <tbody id="chatTable" class="divide-y divide-slate-100"></tbody>
-        </table>
-      </div>
-    </section>
+</button>
 
-    <!-- Notifications Section -->
-    <section id="notifications" class="admin-section hidden space-y-6">
-      <h1 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-4">Promotional Notifications</h1>
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-4 max-w-xl">
-        <input type="text" id="notificationTitle" placeholder="Notification Title" class="border border-slate-300 rounded-lg p-2.5 text-sm w-full">
-        <textarea id="notificationMessage" placeholder="Notification Message" rows="4" class="border border-slate-300 rounded-lg p-2.5 text-sm w-full"></textarea>
-        <button type="button" onclick="sendPromotionNotification()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium w-full">Send Notification</button>
-      </div>
-    </section>
+<button id="adminLogout">
 
-  </main>
+Logout
 
-  <!-- Modals -->
-  <div id="orderViewer" class="modal fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
-      <h2 class="text-xl font-bold text-slate-900 border-b border-slate-100 pb-2">Order Details - <span id="viewerNumber" class="text-indigo-600"></span></h2>
-      <div class="grid grid-cols-2 gap-2 text-sm">
-        <p><strong>Customer:</strong> <span id="viewerCustomer"></span></p>
-        <p><strong>Phone:</strong> <span id="viewerPhone"></span></p>
-        <p class="col-span-2"><strong>Address:</strong> <span id="viewerAddress"></span></p>
-        <p><strong>Payment Method:</strong> <span id="viewerPayment"></span></p>
-      </div>
-      <div class="grid grid-cols-3 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
-        <label class="text-xs font-semibold text-slate-600">Order Status
-          <select id="viewerStatus" class="mt-1 w-full border border-slate-300 rounded p-1.5 text-sm bg-white">
-            <option value="Pending">Pending</option>
-            <option value="Processing">Processing</option>
-            <option value="Completed">Completed</option>
-            <option value="Cancelled">Cancelled</option>
-          </select>
-        </label>
-        <label class="text-xs font-semibold text-slate-600">Delivery Status
-          <select id="viewerDelivery" class="mt-1 w-full border border-slate-300 rounded p-1.5 text-sm bg-white">
-            <option value="Pending">Pending</option>
-            <option value="Shipped">Shipped</option>
-            <option value="Delivered">Delivered</option>
-          </select>
-        </label>
-        <label class="text-xs font-semibold text-slate-600">Payment Status
-          <select id="viewerPaymentStatus" class="mt-1 w-full border border-slate-300 rounded p-1.5 text-sm bg-white">
-            <option value="Pending">Pending</option>
-            <option value="Paid">Paid</option>
-            <option value="Failed">Failed</option>
-          </select>
-        </label>
-      </div>
-      <div id="viewerItems" class="space-y-2 border-t border-slate-100 pt-3"></div>
-      <div class="flex justify-end gap-3 border-t border-slate-100 pt-3">
-        <button type="button" onclick="saveOrderStatus()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Save Changes</button>
-        <button type="button" onclick="document.getElementById('orderViewer').classList.add('hidden')" class="bg-slate-200 text-slate-800 px-4 py-2 rounded-lg text-sm font-medium">Close</button>
-      </div>
-    </div>
-  </div>
+</button>
 
-  <div id="customerModal" class="modal fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 text-center shadow-2xl">
-      <img id="customerImage" class="w-20 h-20 rounded-full mx-auto border-2 border-indigo-500 object-cover">
-      <h2 id="customerName" class="text-xl font-bold text-slate-900"></h2>
-      <p id="customerEmail" class="text-sm text-slate-500"></p>
-      <p id="customerPhone" class="text-sm text-slate-500"></p>
-      <p id="customerAddress" class="text-sm text-slate-600 bg-slate-50 p-2 rounded border border-slate-100"></p>
-      <h3 class="text-left font-bold text-slate-800 border-b pb-1">Order History</h3>
-      <div id="customerOrders" class="max-h-40 overflow-y-auto space-y-2 text-left"></div>
-      <button type="button" onclick="document.getElementById('customerModal').classList.add('hidden')" class="bg-slate-200 text-slate-800 px-4 py-2 rounded-lg text-sm font-medium w-full">Close</button>
-    </div>
-  </div>
+</div>
 
-  <div id="chatModal" class="modal fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 flex flex-col h-[500px] shadow-2xl">
-      <h2 class="text-lg font-bold text-slate-900 border-b pb-2">Chat with <span id="adminChatUser" class="text-indigo-600"></span></h2>
-      <div id="adminChatMessages" class="flex-1 overflow-y-auto space-y-2 p-2 bg-slate-50 rounded-lg border"></div>
-      <div class="flex gap-2">
-        <input type="text" id="adminMessage" placeholder="Type a message..." class="flex-1 border border-slate-300 rounded-lg p-2 text-sm">
-        <button type="button" id="adminSend" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Send</button>
-      </div>
-      <button type="button" onclick="document.getElementById('chatModal').classList.add('hidden')" class="bg-slate-200 text-slate-800 px-3 py-1.5 rounded-lg text-sm font-medium self-end">Close</button>
-    </div>
-  </div>
+</header>
 
-  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2"></div>
+<div class="admin-layout">
 
-  <!-- Scripts -->
-  <script type="module" src="admin.js"></script>
-  <script>
-    // Navigation Tab Switching
-    document.querySelectorAll('.sidebar-menu a').forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetId = link.getAttribute('href').substring(1);
-        
-        document.querySelectorAll('.sidebar-menu a').forEach(l => {
-          l.classList.remove('bg-indigo-600', 'text-white');
-          l.classList.add('text-slate-300');
-        });
-        document.querySelectorAll('.admin-section').forEach(s => s.classList.add('hidden'));
-        
-        link.classList.add('bg-indigo-600', 'text-white');
-        link.classList.remove('text-slate-300');
-        
-        const targetSection = document.getElementById(targetId);
-        if(targetSection) targetSection.classList.remove('hidden');
-      });
-    });
-  </script>
+<aside class="admin-sidebar">
+
+<button class="admin-menu active" data-tab="dashboard">
+
+Dashboard
+
+</button>
+
+<button class="admin-menu" data-tab="products">
+
+Products
+
+</button>
+
+<button class="admin-menu" data-tab="categories">
+
+Categories
+
+</button>
+
+<button class="admin-menu" data-tab="orders">
+
+Orders
+
+</button>
+
+<button class="admin-menu" data-tab="customers">
+
+Customers
+
+</button>
+
+<button class="admin-menu" data-tab="banners">
+
+Banners
+
+</button>
+
+<button class="admin-menu" data-tab="coupons">
+
+Coupons
+
+</button>
+
+<button class="admin-menu" data-tab="chat">
+
+Live Chat
+
+</button>
+
+<button class="admin-menu" data-tab="notifications">
+
+Notifications
+
+</button>
+
+</aside>
+
+<main class="admin-content">
+
+<section id="dashboardTab" class="admin-page">
+
+<div class="dashboard-grid">
+
+<div class="dashboard-card">
+
+<h4>
+
+Revenue
+
+</h4>
+
+<h2 id="totalRevenue">
+
+৳0
+
+</h2>
+
+</div>
+
+<div class="dashboard-card">
+
+<h4>
+
+Orders
+
+</h4>
+
+<h2 id="totalOrders">
+
+0
+
+</h2>
+
+</div>
+
+<div class="dashboard-card">
+
+<h4>
+
+Products
+
+</h4>
+
+<h2 id="totalProducts">
+
+0
+
+</h2>
+
+</div>
+
+<div class="dashboard-card">
+
+<h4>
+
+Customers
+
+</h4>
+
+<h2 id="totalCustomers">
+
+0
+
+</h2>
+
+</div>
+
+<div class="dashboard-card">
+
+<h4>
+
+Low Stock
+
+</h4>
+
+<h2 id="lowStock">
+
+0
+
+</h2>
+
+</div>
+
+<div class="dashboard-card">
+
+<h4>
+
+Out Of Stock
+
+</h4>
+
+<h2 id="outOfStock">
+
+0
+
+</h2>
+
+</div>
+
+</div>
+
+</section>
+
+<section id="productsTab" class="admin-page hidden">
+
+<div class="admin-toolbar">
+
+<h3>
+
+Product Management
+
+</h3>
+
+<div>
+
+<input
+id="productId"
+type="hidden">
+
+<input
+id="productImages"
+type="file"
+accept="image/*"
+multiple>
+
+<input
+id="productName"
+type="text"
+placeholder="Product Name">
+
+<input
+id="productBrand"
+type="text"
+placeholder="Brand">
+
+<!-- ক্যাটাগরি সিলেক্ট অপশন -->
+<label for="productCategory">ক্যাটাগরি সিলেক্ট করুন:</label>
+<select id="productCategory" required>
+  <option value="">ক্যাটাগরি লোড হচ্ছে...</option>
+</select>
+
+<input
+id="productSku"
+type="text"
+placeholder="SKU">
+
+<input
+id="productPrice"
+type="number"
+placeholder="Price">
+
+<input
+id="productSalePrice"
+type="number"
+placeholder="Sale Price">
+
+<input
+id="productStock"
+type="number"
+placeholder="Stock">
+
+<input
+id="productBadge"
+type="text"
+placeholder="Badge">
+
+<textarea
+id="productDescription"
+placeholder="Description"></textarea>
+
+<button onclick="addProduct()">
+
+Add Product
+
+</button>
+
+<button onclick="updateProduct()">
+
+Update Product
+
+</button>
+
+<button onclick="exportProducts()">
+
+Export CSV
+
+</button>
+
+<label class="admin-upload">
+
+Import CSV
+
+<input id="productImport" type="file" accept=".csv" onchange="importProducts(this.files[0])" hidden>
+
+</label>
+
+</div>
+
+</div>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Image
+
+</th>
+
+<th>
+
+Name
+
+</th>
+
+<th>
+
+Brand
+
+</th>
+
+<th>
+
+Stock
+
+</th>
+
+<th>
+
+Price
+
+</th>
+
+<th>
+
+Action
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="productTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="categoriesTab" class="admin-page hidden">
+
+<div class="admin-toolbar">
+
+<h3>
+
+Category Management
+
+</h3>
+
+<div>
+
+<input
+id="categoryId"
+type="hidden">
+
+<input
+id="categoryImage"
+type="file"
+accept="image/*">
+
+<input
+id="categoryName"
+type="text"
+placeholder="Category Name">
+
+<button onclick="addCategory()">
+
+Add
+
+</button>
+
+<button onclick="updateCategory()">
+
+Update
+
+</button>
+
+</div>
+
+</div>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Image
+
+</th>
+
+<th>
+
+Category
+
+</th>
+
+<th>
+
+Sub Category
+
+</th>
+
+<th>
+
+Action
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="categoryTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="ordersTab" class="admin-page hidden">
+
+<h3>
+
+Order Management
+
+</h3>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Order</th>
+
+<th>Customer</th>
+
+<th>Payment</th>
+
+<th>Payment Status</th>
+
+<th>Delivery</th>
+
+<th>Status</th>
+
+<th>Total</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="orderTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="customersTab" class="admin-page hidden">
+
+<h3>
+
+Customer Management
+
+</h3>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Photo</th>
+
+<th>Name</th>
+
+<th>Phone</th>
+
+<th>Email</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="customerTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="bannersTab" class="admin-page hidden">
+
+<div class="admin-toolbar">
+
+<h3>
+
+Banner Management
+
+</h3>
+
+<div>
+
+<input
+id="bannerId"
+type="hidden">
+
+<input
+id="bannerImage"
+type="file"
+accept="image/*">
+
+<input
+id="bannerTitle"
+type="text"
+placeholder="Banner Title">
+
+<input
+id="bannerSubtitle"
+type="text"
+placeholder="Banner Subtitle">
+
+<input
+id="bannerLink"
+type="text"
+placeholder="Banner Link">
+
+<input
+id="bannerPriority"
+type="number"
+placeholder="Priority">
+
+<button onclick="addBanner()">
+
+Add
+
+</button>
+
+<button onclick="updateBanner()">
+
+Update
+
+</button>
+
+</div>
+
+</div>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Image</th>
+
+<th>Title</th>
+
+<th>Priority</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="bannerTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="couponsTab" class="admin-page hidden">
+
+<div class="admin-toolbar">
+
+<h3>
+
+Coupon Management
+
+</h3>
+
+<div>
+
+<input
+id="couponId"
+type="hidden">
+
+<input
+id="couponCode"
+type="text"
+placeholder="Coupon Code">
+
+<input
+id="couponAmount"
+type="number"
+placeholder="Amount">
+
+<input
+id="couponExpiry"
+type="date">
+
+<button onclick="addCoupon()">
+
+Add
+
+</button>
+
+<button onclick="updateCoupon()">
+
+Update
+
+</button>
+
+</div>
+
+</div>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Code</th>
+
+<th>Amount</th>
+
+<th>Expiry</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="couponTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="chatTab" class="admin-page hidden">
+
+<h3>
+
+Live Chat
+
+</h3>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>User</th>
+
+<th>Last Message</th>
+
+<th>Status</th>
+
+<th>Typing</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="chatTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="notificationsTab" class="admin-page hidden">
+
+<h3>
+
+Send Notification
+
+</h3>
+
+<div class="admin-form">
+
+<input
+id="notificationTitle"
+type="text"
+placeholder="Notification Title">
+
+<textarea
+id="notificationMessage"
+placeholder="Notification Message">
+
+</textarea>
+
+<button
+onclick="sendPromotionNotification()">
+
+Send Notification
+
+</button>
+
+</div>
+
+</section>
+
+</main>
+
+</div>
+
+<div id="orderViewer" class="modal">
+
+<div class="modal-content">
+
+<button
+class="modal-close"
+onclick="document.getElementById('orderViewer').classList.remove('active')">
+
+✕
+
+</button>
+
+<h2>
+
+Order Details
+
+</h2>
+
+<p>
+
+Order :
+<strong id="viewerNumber"></strong>
+
+</p>
+
+<p>
+
+Customer :
+<strong id="viewerCustomer"></strong>
+
+</p>
+
+<p>
+
+Phone :
+<strong id="viewerPhone"></strong>
+
+</p>
+
+<p>
+
+Address :
+<strong id="viewerAddress"></strong>
+
+</p>
+
+<p>
+
+Payment :
+<strong id="viewerPayment"></strong>
+
+</p>
+
+<div id="viewerItems">
+
+</div>
+
+<label>
+
+Order Status
+
+</label>
+
+<select id="viewerStatus">
+
+<option>Pending</option>
+
+<option>Confirmed</option>
+
+<option>Processing</option>
+
+<option>Shipped</option>
+
+<option>Delivered</option>
+
+<option>Cancelled</option>
+
+</select>
+
+<label>
+
+Delivery Status
+
+</label>
+
+<select id="viewerDelivery">
+
+<option>Pending</option>
+
+<option>On The Way</option>
+
+<option>Delivered</option>
+
+</select>
+
+<label>
+
+Payment Status
+
+</label>
+
+<select id="viewerPaymentStatus">
+
+<option>Pending</option>
+
+<option>Paid</option>
+
+<option>Failed</option>
+
+</select>
+
+<button
+onclick="saveOrderStatus()">
+
+Save
+
+</button>
+
+</div>
+
+</div>
+
+<div id="customerModal" class="modal">
+
+<div class="modal-content">
+
+<button
+class="modal-close"
+onclick="document.getElementById('customerModal').classList.remove('active')">
+
+✕
+
+</button>
+
+<img
+id="customerImage"
+class="customer-avatar"
+src=""
+alt="Customer">
+
+<h2 id="customerName"></h2>
+
+<p id="customerEmail"></p>
+
+<p id="customerPhone"></p>
+
+<p id="customerAddress"></p>
+
+<h3>
+
+Order History
+
+</h3>
+
+<div id="customerOrders"></div>
+
+</div>
+
+</div>
+
+<div id="chatModal" class="modal">
+
+<div class="modal-content admin-chat-window">
+
+<button
+class="modal-close"
+onclick="document.getElementById('chatModal').classList.remove('active')">
+
+✕
+
+</button>
+
+<h3>
+
+Chat With
+
+<span id="adminChatUser"></span>
+
+</h3>
+
+<div
+id="adminChatMessages"
+class="admin-chat-messages">
+
+</div>
+
+<div class="admin-chat-input">
+
+<input
+id="adminMessage"
+type="text"
+placeholder="Type message...">
+
+<button id="adminSend">
+
+Send
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+document.querySelectorAll(".admin-menu").forEach(button=>{
+
+button.onclick=()=>{
+
+document.querySelectorAll(".admin-menu").forEach(item=>{
+
+item.classList.remove("active");
+
+});
+
+button.classList.add("active");
+
+document.querySelectorAll(".admin-page").forEach(page=>{
+
+page.classList.add("hidden");
+
+});
+
+document.getElementById(
+
+button.dataset.tab+"Tab"
+
+).classList.remove("hidden");
+
+};
+
+});
+
+</script>
+
+<script type="module" src="admin.js"></script>
+
 </body>
+
 </html>
