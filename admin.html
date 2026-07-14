@@ -1,1017 +1,548 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="bn">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Hind Siliguri', sans-serif;
+    }
 
-<meta charset="UTF-8">
+    body {
+      background-color: #f4f6f9;
+      color: #333;
+      display: flex;
+      min-height: 100vh;
+    }
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+    /* Sidebar Styling */
+    .sidebar {
+      width: 250px;
+      background: #1e293b;
+      color: #fff;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      position: fixed;
+      height: 100vh;
+    }
 
-<title>Admin Dashboard</title>
+    .sidebar h2 {
+      font-size: 20px;
+      color: #38bdf8;
+      margin-bottom: 20px;
+      text-align: center;
+    }
 
-<link rel="stylesheet" href="style.css">
+    .sidebar nav a {
+      color: #cbd5e1;
+      text-decoration: none;
+      padding: 12px 15px;
+      display: block;
+      border-radius: 6px;
+      transition: 0.3s;
+      cursor: pointer;
+      margin-bottom: 5px;
+    }
 
+    .sidebar nav a:hover, .sidebar nav a.active {
+      background: #0284c7;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      margin-left: 250px;
+      padding: 25px;
+    }
+
+    /* Top Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      margin-bottom: 25px;
+    }
+
+    /* Tab Switch Logic: শুধু এক্টিভ সেকশনটি দেখাবে */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Summary Cards */
+    .dashboard-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .card h3 {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 5px;
+    }
+
+    .card p {
+      font-size: 22px;
+      font-weight: bold;
+      color: #0f172a;
+    }
+
+    /* Section Card */
+    .section-card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .section-card h3 {
+      margin-bottom: 15px;
+      color: #0f172a;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 8px;
+    }
+
+    /* Form Layout */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    input, select, textarea {
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #0284c7;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 18px;
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .btn:hover { background: #0369a1; }
+    .btn-danger { background: #ef4444; }
+    .btn-danger:hover { background: #dc2626; }
+
+    /* Data Tables */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #475569;
+    }
+
+    td img {
+      border-radius: 4px;
+      object-fit: cover;
+    }
+
+    /* Toast Notification */
+    #toastContainer {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .toast {
+      background: #10b981;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 6px;
+      margin-top: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal.active { display: flex; }
+
+    .modal-content {
+      background: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+  </style>
 </head>
-
 <body>
 
-<div id="toastContainer"></div>
-
-<header class="admin-header">
-
-<div class="admin-logo">
-
-<h2>
-
-Admin Dashboard
-
-</h2>
-
-</div>
-
-<div class="admin-header-right">
-
-<button id="adminNotification">
-
-Notifications
-
-</button>
-
-<button id="adminLogout">
-
-Logout
-
-</button>
-
-</div>
-
-</header>
-
-<div class="admin-layout">
-
-<aside class="admin-sidebar">
-
-<button class="admin-menu active" data-tab="dashboard">
-
-Dashboard
-
-</button>
-
-<button class="admin-menu" data-tab="products">
-
-Products
-
-</button>
-
-<button class="admin-menu" data-tab="categories">
-
-Categories
-
-</button>
-
-<button class="admin-menu" data-tab="orders">
-
-Orders
-
-</button>
-
-<button class="admin-menu" data-tab="customers">
-
-Customers
-
-</button>
-
-<button class="admin-menu" data-tab="banners">
-
-Banners
-
-</button>
-
-<button class="admin-menu" data-tab="coupons">
-
-Coupons
-
-</button>
-
-<button class="admin-menu" data-tab="chat">
-
-Live Chat
-
-</button>
-
-<button class="admin-menu" data-tab="notifications">
-
-Notifications
-
-</button>
-
-</aside>
-
-<main class="admin-content">
-
-<section id="dashboardTab" class="admin-page">
-
-<div class="dashboard-grid">
-
-<div class="dashboard-card">
-
-<h4>
-
-Revenue
-
-</h4>
-
-<h2 id="totalRevenue">
-
-৳0
-
-</h2>
-
-</div>
-
-<div class="dashboard-card">
-
-<h4>
-
-Orders
-
-</h4>
-
-<h2 id="totalOrders">
-
-0
-
-</h2>
-
-</div>
-
-<div class="dashboard-card">
-
-<h4>
-
-Products
-
-</h4>
-
-<h2 id="totalProducts">
-
-0
-
-</h2>
-
-</div>
-
-<div class="dashboard-card">
-
-<h4>
-
-Customers
-
-</h4>
-
-<h2 id="totalCustomers">
-
-0
-
-</h2>
-
-</div>
-
-<div class="dashboard-card">
-
-<h4>
-
-Low Stock
-
-</h4>
-
-<h2 id="lowStock">
-
-0
-
-</h2>
-
-</div>
-
-<div class="dashboard-card">
-
-<h4>
-
-Out Of Stock
-
-</h4>
-
-<h2 id="outOfStock">
-
-0
-
-</h2>
-
-</div>
-
-</div>
-
-</section>
-
-<section id="productsTab" class="admin-page hidden">
-
-<div class="admin-toolbar">
-
-<h3>
-
-Product Management
-
-</h3>
-
-<div>
-
-<input
-id="productId"
-type="hidden">
-
-<input
-id="productImages"
-type="file"
-accept="image/*"
-multiple>
-
-<input
-id="productName"
-type="text"
-placeholder="Product Name">
-
-<input
-id="productBrand"
-type="text"
-placeholder="Brand">
-
-<!-- ক্যাটাগরি সিলেক্ট অপশন -->
-<label for="productCategory">ক্যাটাগরি সিলেক্ট করুন:</label>
-<select id="productCategory" required>
-  <option value="">ক্যাটাগরি লোড হচ্ছে...</option>
-</select>
-
-<input
-id="productSku"
-type="text"
-placeholder="SKU">
-
-<input
-id="productPrice"
-type="number"
-placeholder="Price">
-
-<input
-id="productSalePrice"
-type="number"
-placeholder="Sale Price">
-
-<input
-id="productStock"
-type="number"
-placeholder="Stock">
-
-<input
-id="productBadge"
-type="text"
-placeholder="Badge">
-
-<textarea
-id="productDescription"
-placeholder="Description"></textarea>
-
-<button onclick="addProduct()">
-
-Add Product
-
-</button>
-
-<button onclick="updateProduct()">
-
-Update Product
-
-</button>
-
-<button onclick="exportProducts()">
-
-Export CSV
-
-</button>
-
-<label class="admin-upload">
-
-Import CSV
-
-<input id="productImport" type="file" accept=".csv" onchange="importProducts(this.files[0])" hidden>
-
-</label>
-
-</div>
-
-</div>
-
-<div class="table-wrapper">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Image
-
-</th>
-
-<th>
-
-Name
-
-</th>
-
-<th>
-
-Brand
-
-</th>
-
-<th>
-
-Stock
-
-</th>
-
-<th>
-
-Price
-
-</th>
-
-<th>
-
-Action
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody id="productTable">
-
-</tbody>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="categoriesTab" class="admin-page hidden">
-
-<div class="admin-toolbar">
-
-<h3>
-
-Category Management
-
-</h3>
-
-<div>
-
-<input
-id="categoryId"
-type="hidden">
-
-<input
-id="categoryImage"
-type="file"
-accept="image/*">
-
-<input
-id="categoryName"
-type="text"
-placeholder="Category Name">
-
-<button onclick="addCategory()">
-
-Add
-
-</button>
-
-<button onclick="updateCategory()">
-
-Update
-
-</button>
-
-</div>
-
-</div>
-
-<div class="table-wrapper">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Image
-
-</th>
-
-<th>
-
-Category
-
-</th>
-
-<th>
-
-Sub Category
-
-</th>
-
-<th>
-
-Action
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody id="categoryTable">
-
-</tbody>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="ordersTab" class="admin-page hidden">
-
-<h3>
-
-Order Management
-
-</h3>
-
-<div class="table-wrapper">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>Order</th>
-
-<th>Customer</th>
-
-<th>Payment</th>
-
-<th>Payment Status</th>
-
-<th>Delivery</th>
-
-<th>Status</th>
-
-<th>Total</th>
-
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-<tbody id="orderTable"></tbody>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="customersTab" class="admin-page hidden">
-
-<h3>
-
-Customer Management
-
-</h3>
-
-<div class="table-wrapper">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>Photo</th>
-
-<th>Name</th>
-
-<th>Phone</th>
-
-<th>Email</th>
-
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-<tbody id="customerTable"></tbody>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="bannersTab" class="admin-page hidden">
-
-<div class="admin-toolbar">
-
-<h3>
-
-Banner Management
-
-</h3>
-
-<div>
-
-<input
-id="bannerId"
-type="hidden">
-
-<input
-id="bannerImage"
-type="file"
-accept="image/*">
-
-<input
-id="bannerTitle"
-type="text"
-placeholder="Banner Title">
-
-<input
-id="bannerSubtitle"
-type="text"
-placeholder="Banner Subtitle">
-
-<input
-id="bannerLink"
-type="text"
-placeholder="Banner Link">
-
-<input
-id="bannerPriority"
-type="number"
-placeholder="Priority">
-
-<button onclick="addBanner()">
-
-Add
-
-</button>
-
-<button onclick="updateBanner()">
-
-Update
-
-</button>
-
-</div>
-
-</div>
-
-<div class="table-wrapper">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>Image</th>
-
-<th>Title</th>
-
-<th>Priority</th>
-
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-<tbody id="bannerTable"></tbody>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="couponsTab" class="admin-page hidden">
-
-<div class="admin-toolbar">
-
-<h3>
-
-Coupon Management
-
-</h3>
-
-<div>
-
-<input
-id="couponId"
-type="hidden">
-
-<input
-id="couponCode"
-type="text"
-placeholder="Coupon Code">
-
-<input
-id="couponAmount"
-type="number"
-placeholder="Amount">
-
-<input
-id="couponExpiry"
-type="date">
-
-<button onclick="addCoupon()">
-
-Add
-
-</button>
-
-<button onclick="updateCoupon()">
-
-Update
-
-</button>
-
-</div>
-
-</div>
-
-<div class="table-wrapper">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>Code</th>
-
-<th>Amount</th>
-
-<th>Expiry</th>
-
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-<tbody id="couponTable"></tbody>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="chatTab" class="admin-page hidden">
-
-<h3>
-
-Live Chat
-
-</h3>
-
-<div class="table-wrapper">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>User</th>
-
-<th>Last Message</th>
-
-<th>Status</th>
-
-<th>Typing</th>
-
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-<tbody id="chatTable">
-
-</tbody>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="notificationsTab" class="admin-page hidden">
-
-<h3>
-
-Send Notification
-
-</h3>
-
-<div class="admin-form">
-
-<input
-id="notificationTitle"
-type="text"
-placeholder="Notification Title">
-
-<textarea
-id="notificationMessage"
-placeholder="Notification Message">
-
-</textarea>
-
-<button
-onclick="sendPromotionNotification()">
-
-Send Notification
-
-</button>
-
-</div>
-
-</section>
-
-</main>
-
-</div>
-
-<div id="orderViewer" class="modal">
-
-<div class="modal-content">
-
-<button
-class="modal-close"
-onclick="document.getElementById('orderViewer').classList.remove('active')">
-
-✕
-
-</button>
-
-<h2>
-
-Order Details
-
-</h2>
-
-<p>
-
-Order :
-<strong id="viewerNumber"></strong>
-
-</p>
-
-<p>
-
-Customer :
-<strong id="viewerCustomer"></strong>
-
-</p>
-
-<p>
-
-Phone :
-<strong id="viewerPhone"></strong>
-
-</p>
-
-<p>
-
-Address :
-<strong id="viewerAddress"></strong>
-
-</p>
-
-<p>
-
-Payment :
-<strong id="viewerPayment"></strong>
-
-</p>
-
-<div id="viewerItems">
-
-</div>
-
-<label>
-
-Order Status
-
-</label>
-
-<select id="viewerStatus">
-
-<option>Pending</option>
-
-<option>Confirmed</option>
-
-<option>Processing</option>
-
-<option>Shipped</option>
-
-<option>Delivered</option>
-
-<option>Cancelled</option>
-
-</select>
-
-<label>
-
-Delivery Status
-
-</label>
-
-<select id="viewerDelivery">
-
-<option>Pending</option>
-
-<option>On The Way</option>
-
-<option>Delivered</option>
-
-</select>
-
-<label>
-
-Payment Status
-
-</label>
-
-<select id="viewerPaymentStatus">
-
-<option>Pending</option>
-
-<option>Paid</option>
-
-<option>Failed</option>
-
-</select>
-
-<button
-onclick="saveOrderStatus()">
-
-Save
-
-</button>
-
-</div>
-
-</div>
-
-<div id="customerModal" class="modal">
-
-<div class="modal-content">
-
-<button
-class="modal-close"
-onclick="document.getElementById('customerModal').classList.remove('active')">
-
-✕
-
-</button>
-
-<img
-id="customerImage"
-class="customer-avatar"
-src=""
-alt="Customer">
-
-<h2 id="customerName"></h2>
-
-<p id="customerEmail"></p>
-
-<p id="customerPhone"></p>
-
-<p id="customerAddress"></p>
-
-<h3>
-
-Order History
-
-</h3>
-
-<div id="customerOrders"></div>
-
-</div>
-
-</div>
-
-<div id="chatModal" class="modal">
-
-<div class="modal-content admin-chat-window">
-
-<button
-class="modal-close"
-onclick="document.getElementById('chatModal').classList.remove('active')">
-
-✕
-
-</button>
-
-<h3>
-
-Chat With
-
-<span id="adminChatUser"></span>
-
-</h3>
-
-<div
-id="adminChatMessages"
-class="admin-chat-messages">
-
-</div>
-
-<div class="admin-chat-input">
-
-<input
-id="adminMessage"
-type="text"
-placeholder="Type message...">
-
-<button id="adminSend">
-
-Send
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<script>
-
-document.querySelectorAll(".admin-menu").forEach(button=>{
-
-button.onclick=()=>{
-
-document.querySelectorAll(".admin-menu").forEach(item=>{
-
-item.classList.remove("active");
-
-});
-
-button.classList.add("active");
-
-document.querySelectorAll(".admin-page").forEach(page=>{
-
-page.classList.add("hidden");
-
-});
-
-document.getElementById(
-
-button.dataset.tab+"Tab"
-
-).classList.remove("hidden");
-
-};
-
-});
-
-</script>
-
-<script type="module" src="admin.js"></script>
-
+  <!-- Sidebar Menu (ট্যাব নেভিগেশন) -->
+  <div class="sidebar">
+    <h2>Admin Panel</h2>
+    <nav>
+      <a onclick="switchTab('summary')" class="nav-link active">ড্যাশবোর্ড</a>
+      <a onclick="switchTab('products')" class="nav-link">প্রোডাক্টস</a>
+      <a onclick="switchTab('categories')" class="nav-link">ক্যাটাগরি</a>
+      <a onclick="switchTab('orders')" class="nav-link">অর্ডারসমূহ</a>
+      <a onclick="switchTab('customers')" class="nav-link">কাস্টমারস</a>
+      <a onclick="switchTab('banners')" class="nav-link">ব্যানারস</a>
+      <a onclick="switchTab('coupons')" class="nav-link">কুপন</a>
+      <a onclick="switchTab('chats')" class="nav-link">লাইভ চ্যাট</a>
+      <a onclick="switchTab('notifications')" class="nav-link">নোটিফিকেশন</a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    
+    <!-- Top Bar -->
+    <div class="header">
+      <h2 id="pageTitle">ড্যাশবোর্ড</h2>
+      <div id="toastContainer"></div>
+    </div>
+
+    <!-- 1. Dashboard Summary Tab -->
+    <div id="tab-summary" class="tab-content active">
+      <div class="dashboard-cards">
+        <div class="card"><h3>মোট রেভিনিউ</h3><p id="totalRevenue">৳0</p></div>
+        <div class="card"><h3>মোট অর্ডার</h3><p id="totalOrders">0</p></div>
+        <div class="card"><h3>মোট প্রোডাক্ট</h3><p id="totalProducts">0</p></div>
+        <div class="card"><h3>মোট কাস্টমার</h3><p id="totalCustomers">0</p></div>
+        <div class="card"><h3>লো স্টক</h3><p id="lowStock">0</p></div>
+        <div class="card"><h3>আউট অফ স্টক</h3><p id="outOfStock">0</p></div>
+      </div>
+    </div>
+
+    <!-- 2. Products Tab -->
+    <div id="tab-products" class="tab-content">
+      <div class="section-card">
+        <h3>প্রোডাক্ট ম্যানেজমেন্ট</h3>
+        <form id="productForm" onsubmit="event.preventDefault();">
+          <input type="hidden" id="productId">
+          <div class="form-grid">
+            <div class="form-group"><label>প্রোডাক্টের নাম</label><input type="text" id="productName" required></div>
+            <div class="form-group"><label>ব্র্যান্ড</label><input type="text" id="productBrand"></div>
+            <div class="form-group">
+              <label>ক্যাটাগরি</label>
+              <select id="productCategory" required>
+                <option value="">ক্যাটাগরি বেছে নিন</option>
+              </select>
+            </div>
+            <div class="form-group"><label>SKU Code</label><input type="text" id="productSku"></div>
+            <div class="form-group"><label>মূল্য (৳)</label><input type="number" id="productPrice" required></div>
+            <div class="form-group"><label>অফার মূল্য (৳)</label><input type="number" id="productSalePrice"></div>
+            <div class="form-group"><label>স্টক পরিমাণ</label><input type="number" id="productStock" required></div>
+            <div class="form-group"><label>ব্যাজ (Badge)</label><input type="text" id="productBadge" placeholder="Hot/New"></div>
+            <div class="form-group" style="grid-column: span 2;">
+              <label>ইমেজ লিংক (URL)</label>
+              <input type="url" id="productImages" placeholder="https://example.com/image.jpg" required>
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+              <label>বিবরণ (Description)</label>
+              <textarea id="productDescription" rows="3"></textarea>
+            </div>
+          </div>
+          <button class="btn" onclick="addProduct()">প্রোডাক্ট যোগ করুন</button>
+          <button class="btn" onclick="updateProduct()">আপডেট করুন</button>
+        </form>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>ছবি</th><th>নাম</th><th>ব্র্যান্ড</th><th>স্টক</th><th>মূল্য</th><th>অ্যাকশন</th></tr>
+            </thead>
+            <tbody id="productTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Categories Tab -->
+    <div id="tab-categories" class="tab-content">
+      <div class="section-card">
+        <h3>ক্যাটাগরি ম্যানেজমেন্ট</h3>
+        <form id="categoryForm" onsubmit="event.preventDefault();">
+          <input type="hidden" id="categoryId">
+          <div class="form-grid">
+            <div class="form-group"><label>ক্যাটাগরির নাম</label><input type="text" id="categoryName" required></div>
+            <div class="form-group"><label>ক্যাটাগরি ইমেজ লিংক (URL)</label><input type="url" id="categoryImage" required></div>
+          </div>
+          <button class="btn" onclick="addCategory()">ক্যাটাগরি যোগ করুন</button>
+          <button class="btn" onclick="updateCategory()">আপডেট করুন</button>
+        </form>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>ছবি</th><th>ক্যাটাগরির নাম</th><th>সাব-ক্যাটাগরি</th><th>অ্যাকশন</th></tr>
+            </thead>
+            <tbody id="categoryTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Orders Tab -->
+    <div id="tab-orders" class="tab-content">
+      <div class="section-card">
+        <h3>অর্ডার ম্যানেজমেন্ট</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>অর্ডার নং</th><th>কাস্টমার</th><th>পেমেন্ট মেথড</th><th>পেমেন্ট স্ট্যাটাস</th><th>ডেলিভারি স্ট্যাটাস</th><th>স্ট্যাটাস</th><th>মোট টাকা</th><th>অ্যাকশন</th></tr>
+            </thead>
+            <tbody id="orderTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Customers Tab -->
+    <div id="tab-customers" class="tab-content">
+      <div class="section-card">
+        <h3>কাস্টমার তালিকা</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>ছবি</th><th>নাম</th><th>ফোন</th><th>ইমেইল</th><th>অ্যাকশন</th></tr>
+            </thead>
+            <tbody id="customerTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Banners Tab -->
+    <div id="tab-banners" class="tab-content">
+      <div class="section-card">
+        <h3>ব্যানার ম্যানেজমেন্ট</h3>
+        <form id="bannerForm" onsubmit="event.preventDefault();">
+          <input type="hidden" id="bannerId">
+          <div class="form-grid">
+            <div class="form-group"><label>টাইটেল</label><input type="text" id="bannerTitle"></div>
+            <div class="form-group"><label>সাব-টাইটেল</label><input type="text" id="bannerSubtitle"></div>
+            <div class="form-group"><label>লিংক</label><input type="text" id="bannerLink"></div>
+            <div class="form-group"><label>প্রাইয়োরিটি (Priority)</label><input type="number" id="bannerPriority" value="1"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>ব্যানার ইমেজ লিংক (URL)</label><input type="url" id="bannerImage" required></div>
+          </div>
+          <button class="btn" onclick="addBanner()">ব্যানার যোগ করুন</button>
+          <button class="btn" onclick="updateBanner()">আপডেট করুন</button>
+        </form>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>ছবি</th><th>টাইটেল</th><th>প্রাইয়োরিটি</th><th>অ্যাকশন</th></tr>
+            </thead>
+            <tbody id="bannerTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Coupons Tab -->
+    <div id="tab-coupons" class="tab-content">
+      <div class="section-card">
+        <h3>কুপন ম্যানেজমেন্ট</h3>
+        <form id="couponForm" onsubmit="event.preventDefault();">
+          <input type="hidden" id="couponId">
+          <div class="form-grid">
+            <div class="form-group"><label>কুপন কোড</label><input type="text" id="couponCode" required></div>
+            <div class="form-group"><label>ডিসকাউন্ট পরিমাণ (৳)</label><input type="number" id="couponAmount" required></div>
+            <div class="form-group"><label>মেয়াদ শেষ</label><input type="date" id="couponExpiry" required></div>
+          </div>
+          <button class="btn" onclick="addCoupon()">কুপন যোগ করুন</button>
+          <button class="btn" onclick="updateCoupon()">আপডেট করুন</button>
+        </form>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>কুপন কোড</th><th>ডিসকাউন্ট</th><th>মেয়াদ</th><th>অ্যাকশন</th></tr>
+            </thead>
+            <tbody id="couponTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. Live Chat Tab -->
+    <div id="tab-chats" class="tab-content">
+      <div class="section-card">
+        <h3>লাইভ চ্যাট</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>ইউজার আইডি</th><th>সর্বশেষ মেসেজ</th><th>অনলাইন স্ট্যাটাস</th><th>টাইপিং</th><th>অ্যাকশন</th></tr>
+            </thead>
+            <tbody id="chatTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. Notifications Tab -->
+    <div id="tab-notifications" class="tab-content">
+      <div class="section-card">
+        <h3>প্রোমোশনাল নোটিফিকেশন</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>নোটিফিকেশন টাইটেল</label><input type="text" id="notificationTitle"></div>
+          <div class="form-group" style="grid-column: span 2;"><label>মেসেজ</label><textarea id="notificationMessage" rows="3"></textarea></div>
+        </div>
+        <button class="btn" onclick="sendPromotionNotification()">সকলের কাছে পাঠান</button>
+      </div>
+    </div>
+
+  </div> <!-- End Main Content -->
+
+  <!-- Order Viewer Modal -->
+  <div id="orderViewer" class="modal">
+    <div class="modal-content">
+      <h3>অর্ডার বিস্তারিত - <span id="viewerNumber"></span></h3>
+      <p><strong>কাস্টমার:</strong> <span id="viewerCustomer"></span></p>
+      <p><strong>ফোন:</strong> <span id="viewerPhone"></span></p>
+      <p><strong>ঠিকানা:</strong> <span id="viewerAddress"></span></p>
+      <p><strong>পেমেন্ট:</strong> <span id="viewerPayment"></span></p>
+      <hr style="margin: 10px 0;">
+      <div id="viewerItems"></div>
+      <hr style="margin: 10px 0;">
+      <div class="form-group"><label>অর্ডার স্ট্যাটাস</label><select id="viewerStatus"><option value="pending">Pending</option><option value="processing">Processing</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div>
+      <div class="form-group"><label>ডেলিভারি স্ট্যাটাস</label><select id="viewerDelivery"><option value="pending">Pending</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option></select></div>
+      <div class="form-group"><label>পেমেন্ট স্ট্যাটাস</label><select id="viewerPaymentStatus"><option value="unpaid">Unpaid</option><option value="paid">Paid</option></select></div>
+      <br>
+      <button class="btn" onclick="saveOrderStatus()">সেভ করুন</button>
+      <button class="btn btn-danger" onclick="document.querySelector('#orderViewer').classList.remove('active')">বন্ধ করুন</button>
+    </div>
+  </div>
+
+  <!-- Customer Modal -->
+  <div id="customerModal" class="modal">
+    <div class="modal-content">
+      <h3>কাস্টমার বিবরণ</h3>
+      <img id="customerImage" width="80" style="border-radius: 50%;">
+      <p><strong>নাম:</strong> <span id="customerName"></span></p>
+      <p><strong>ইমেইল:</strong> <span id="customerEmail"></span></p>
+      <p><strong>ফোন:</strong> <span id="customerPhone"></span></p>
+      <p><strong>ঠিকানা:</strong> <span id="customerAddress"></span></p>
+      <h4>অর্ডার হিস্ট্রি:</h4>
+      <div id="customerOrders"></div>
+      <br>
+      <button class="btn btn-danger" onclick="document.querySelector('#customerModal').classList.remove('active')">বন্ধ করুন</button>
+    </div>
+  </div>
+
+  <!-- Chat Modal -->
+  <div id="chatModal" class="modal">
+    <div class="modal-content">
+      <h3>চ্যাট করুন - <span id="adminChatUser"></span></h3>
+      <div id="adminChatMessages" style="height: 200px; overflow-y: auto; background: #f1f5f9; padding: 10px; margin: 10px 0; border-radius: 6px;"></div>
+      <div style="display: flex; gap: 5px;">
+        <input type="text" id="adminMessage" placeholder="মেসেজ লিখুন..." style="flex: 1;">
+        <button class="btn" id="adminSend">পাঠান</button>
+      </div>
+      <br>
+      <button class="btn btn-danger" onclick="document.querySelector('#chatModal').classList.remove('active')">বন্ধ করুন</button>
+    </div>
+  </div>
+
+  <!-- Tab Switching Script -->
+  <script>
+    function switchTab(tabName) {
+      // ১. সমস্ত ট্যাব কনটেন্ট ব্লক হাইড করা
+      const tabs = document.querySelectorAll('.tab-content');
+      tabs.forEach(tab => tab.classList.remove('active'));
+
+      // ২. নির্দিষ্ট সিলেক্টেড ট্যাব ফিল্ড চালু করা
+      const selectedTab = document.getElementById('tab-' + tabName);
+      if (selectedTab) {
+        selectedTab.classList.add('active');
+      }
+
+      // ৩. নেভিগেশন বাটনের একটিভ কালার সেট করা
+      const navLinks = document.querySelectorAll('.sidebar nav a');
+      navLinks.forEach(link => link.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+
+      // ৪. হেডার টাইটেল চেঞ্জ করা
+      const pageTitle = document.getElementById('pageTitle');
+      if (pageTitle) {
+        pageTitle.textContent = event.currentTarget.textContent;
+      }
+    }
+  </script>
+
+  <!-- Main Firebase Script Module -->
+  <script type="module" src="./admin.js"></script>
 </body>
-
 </html>
