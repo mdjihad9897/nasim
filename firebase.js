@@ -122,6 +122,9 @@ uploadBytes,
 uploadBytesResumable,
 getDownloadURL,
 deleteObject
+uploadProductImages,
+uploadCategoryImage,
+uploadBannerImage,
 
 };
 
