@@ -1991,3 +1991,28 @@ console.log(
 "font-size:16px;color:#2563eb;font-weight:bold"
 
 );
+
+// ডাটাবেস থেকে ক্যাটাগরি এনে ড্রপডাউনে দেখানোর ফাংশন
+function loadCategoriesToDropdown() {
+  const categorySelect = document.getElementById("productCategory");
+  if (!categorySelect) return;
+
+  onSnapshot(collection(db, "categories"), (snapshot) => {
+    categorySelect.innerHTML = '<option value="">ক্যাটাগরি বেছে নিন</option>';
+    
+    snapshot.forEach((doc) => {
+      const category = doc.data();
+      const option = document.createElement("option");
+      
+      // অপশনের Value হবে ক্যাটাগরির ID এবং নাম
+      option.value = doc.id; 
+      option.textContent = category.name || doc.id;
+      
+      categorySelect.appendChild(option);
+    });
+  });
+}
+
+// পেজ লোড হলেই রান হবে
+loadCategoriesToDropdown();
+
