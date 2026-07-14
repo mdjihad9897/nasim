@@ -525,20 +525,26 @@ function initializeApp() {
     renderCategories();
   });
 
-  loadProducts(products => {
+loadProducts(products => {
     state.products = products;
     if (productSkeleton) productSkeleton.classList.add("hidden");
+
+    // ১. প্রোডাক্টগুলো ইউজার স্ক্রিনে রেন্ডার/শো করা
     renderProducts();
 
+    // ২. ফিল্টারে ব্র্যান্ডগুলো অটোমেটিক ডায়নামিকভাবে বসানো
     if (brandFilter) {
-      const brands = [...new Set(products.map(item => item.brand))];
-      brandFilter.innerHTML = '<option value="">Brand</option>';
+      // শুধু বৈধ এবং আসল ব্র্যান্ডগুলো নেওয়া (ফাঁকা বা undefined বাদ দেওয়া)
+      const brands = [...new Set(products.map(item => item.brand).filter(Boolean))];
+      
+      brandFilter.innerHTML = '<option value="">All Brands</option>';
       brands.forEach(brand => {
         brandFilter.innerHTML += `<option value="${brand}">${brand}</option>`;
       });
     }
   });
 }
+
 
 window.addEventListener("load", initializeApp);
 
@@ -692,3 +698,44 @@ if ($("#saveProfileButton")) {
     showToast("Profile saved successfully!");
   };
 }
+
+// app.js-এর একদম শেষে এই অংশটি যোগ করুন
+import { db } from "./firebase.js";
+import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+function loadUserProducts() {
+  const productsContainer = document.querySelector("#productsGrid") || document.querySelector(".product-grid"); 
+  if (!productsContainer) return;
+
+  onSnapshot(collection(db, "products"), (snapshot) => {
+    productsContainer.innerHTML = ""; 
+
+    if (snapshot.empty) {
+      productsContainer.innerHTML = "<p>কোনো প্রোডাক্ট পাওয়া যায়নি।</p>";
+      return;
+    }
+
+    snapshot.forEach((doc) => {
+      const product = doc.data();
+      const imageUrl = (product.images && product.images.length > 0) ? product.images[0] : 'https://via.placeholder.com/150';
+
+      const productHTML = `
+        <div class="product-card" data-id="${doc.id}">
+          <img src="${imageUrl}" alt="${product.name || 'Product'}">
+          <div class="product-info">
+            <h4>${product.name || 'No Title'}</h4>
+            <p class="brand">Brand: ${product.brand || 'N/A'}</p>
+            <div class="price-box">
+              <span class="price">৳${product.salePrice || product.price || 0}</span>
+              ${product.salePrice ? `<span class="old-price">৳${product.price}</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+
+      productsContainer.innerHTML += productHTML;
+    });
+  });
+}
+
+loadUserProducts();
